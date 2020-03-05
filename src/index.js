@@ -1,26 +1,42 @@
-const { app, BrowserWindow } = require('electron')
+const { app, BrowserWindow, BrowserView } = require('electron')
 
-function createWindow () {
+function createMainWindow () {
   // Create the browser window.
-  const win = new BrowserWindow({
-    width: 800,
-    height: 600,
+  const main_win = new BrowserWindow({
+    width: 1200,
+    height: 900,
+    backgroundColor: '#343d46',
+    titleBarStyle: "hiddenInset",
     webPreferences: {
       nodeIntegration: true
     }
-  })
+  });
 
   // and load the index.html of the app.
-  win.loadFile('index.html')
+  main_win.loadFile('index.html');
 
   // Open the DevTools.
-  win.webContents.openDevTools()
+  /*  let view = new BrowserView({
+    parent: main_win,
+  });
+  main_win.setBrowserView(view);
+  view.setAutoResize({
+    width: true,
+    height: true,
+    horizontal: true,
+    vertical: true
+  });
+
+  view.setBounds({ x: 0, y: 0, width: 500, height: 800 });
+  view.webContents.loadFile('subwindow.html');
+  view.webContents.openDevTools(); */
+  main_win.webContents.openDevTools();
 }
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.whenReady().then(createWindow)
+app.whenReady().then(createMainWindow)
 
 // Quit when all windows are closed.
 app.on('window-all-closed', () => {
@@ -35,7 +51,7 @@ app.on('activate', () => {
   // On macOS it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
   if (BrowserWindow.getAllWindows().length === 0) {
-    createWindow()
+    createMainWindow()
   }
 })
 
