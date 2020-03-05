@@ -7,6 +7,7 @@ function createMainWindow () {
     height: 900,
     backgroundColor: '#343d46',
     titleBarStyle: "hiddenInset",
+    title: "vijayo",
     webPreferences: {
       nodeIntegration: true
     }

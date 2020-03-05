@@ -2,19 +2,18 @@
 <html>
   <head>
     <meta charset="UTF-8">
-    <title>Hello World!</title>
     <!-- https://electronjs.org/docs/tutorial/security#csp-meta-tag -->
     <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
     <link href="https://fonts.googleapis.com/css?family=Montserrat|Roboto+Condensed&display=swap" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="main.css">
   </head>
   <body>
-    <div class="sidebar">
-      <h3 class="directory-header">
+    <div class="directory">
+      <h5 id="directory-header">
         EXPLORER
-      </h3>
-      <div class="directory-value">
-        C:\Users\zack\Documents\Git
+      </h5>
+      <div id="directory-value">
+        current_dir
       </div>
       <div class="directory-contents">
 
@@ -24,10 +23,15 @@
     
     </div>
     <div class="timeline">
-
+      
     </div>
     <div class="footer">
-      Footer
+      <span>
+        Footer
+      </span>
+      <span>
+        pwd
+      </span>
     </div>
   </body>
 </html>
