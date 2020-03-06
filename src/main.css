@@ -1,4 +1,5 @@
-html, body {
+html,
+body {
     height: 100vh;
     width: 100vw;
     margin: 0;
@@ -6,36 +7,34 @@ html, body {
 
 body {
     display: grid;
-    grid-template-areas: 
-    "directory live"
-    "directory timeline"
-    "footer    footer";
+    grid-template-areas:
+        'directory live'
+        'directory timeline'
+        'footer    footer';
     grid-template-columns: auto 1fr;
     grid-template-rows: 1fr 2fr 20px;
     font-family: 'Roboto Condensed', sans-serif;
-    color: #D6D6D6;
+    color: #d6d6d6;
 }
 
 /* ::-webkit-resizer {
     display: none;
 } */
 
-::-webkit-scrollbar-track
-{
-	background-color:  #22232A;
+::-webkit-scrollbar-track {
+    background-color: #22232a;
 }
 
-::-webkit-scrollbar
-{
-	width: 10px;
+::-webkit-scrollbar {
+    width: 10px;
 }
 
-::-webkit-scrollbar-thumb
-{
-	background-color: #D6D6D6;	
+::-webkit-scrollbar-thumb {
+    background-color: #d6d6d6;
 }
 
-h1, h5 {
+h1,
+h5 {
     font-family: 'Montserrat', sans-serif;
     margin: 0;
 }
@@ -47,27 +46,59 @@ h1, h5 {
 
 .directory {
     grid-area: directory;
-    background-color:  #1e1f26;
+    background-color: #1e1f26;
     border-right: 1px solid black;
     display: grid;
+    grid-template-areas:
+        'heading'
+        'current_dir'
+        'files'
+        'footer';
     grid-template-columns: 1fr;
-    grid-template-rows: 30px 1fr;
-    padding: 1em;
-    
-    
+    grid-template-rows: 40px 30px 1fr 40px;
+
     overflow: hidden;
     resize: horizontal;
-    max-width: 20vw;
-    min-width: 2.5vw;
+    max-width: 80vw;
+    min-width: 15vw;
 }
 
 #directory-header {
-    text-emphasis: none;
+    grid-area: heading;
+    padding-left: 1rem;
+    padding-top: 1rem;
+}
+
+#directory-value {
+    grid-area: current_dir;
+    padding-left: 1rem;
+    color: #b0b0b0;
+}
+
+#directory-contents {
+    grid-area: files;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    background-color: #2b2c33;
+}
+
+#directory-contents > li {
+    padding-left: 1rem;
+    padding-top: 0.5rem;
+}
+
+.directory-dir {
+    text-decoration: underline;
+}
+
+.movie-file {
+    color: #38c955;
 }
 
 .live {
     grid-area: live;
-    background-color: #26272F;
+    background-color: #2b2c33;
     overflow: auto;
     resize: vertical;
     max-height: 75vh;
@@ -77,19 +108,21 @@ h1, h5 {
 
 .timeline {
     grid-area: timeline;
-    background-color: #22232A;
+    background-color: #22232a;
     border-top: 1px solid black;
     overflow-y: auto;
+    overflow-x: hidden;
     padding: 1em;
 }
 
 .footer {
     grid-area: footer;
     background-color: #1e1f26;
+    color: #b0b0b0;
     border-top: 1px solid black;
-    padding-left: 1em;
+    padding: 0 1em;
     font-size: small;
-    
+
     display: flex;
     flex-direction: row;
     justify-content: flex-start;

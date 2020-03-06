@@ -1,18 +1,23 @@
 {
-  "name": "vijayo",
-  "version": "0.0.1",
-  "description": "Open source video editor built with Electron",
-  "author": {
-    "email": "zack@linkletter.dev",
-    "name": "Z. Linkletter",
-    "url": "https://linkletter.dev"
-  },
-  "license": "MIT",
-  "main": "index.js",
-  "scripts": {
-    "start": "electron ./src"
-  },
-  "devDependencies": {
-    "electron": "^8.0.3"
-  }
+    "name": "vijayo",
+    "version": "0.0.1",
+    "description": "Open source video editor built with Electron",
+    "author": {
+        "email": "zack@linkletter.dev",
+        "name": "Z. Linkletter",
+        "url": "https://linkletter.dev"
+    },
+    "license": "MIT",
+    "main": "index.js",
+    "scripts": {
+        "start": "electron ./src"
+    },
+    "devDependencies": {
+        "electron": "^8.0.3"
+    },
+    "dependencies": {
+        "husky": "^4.2.3",
+        "prettier": "^1.19.1",
+        "pretty-quick": "^2.0.1"
+    }
 }

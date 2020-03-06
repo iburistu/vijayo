@@ -1,37 +1,34 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8">
-    <!-- https://electronjs.org/docs/tutorial/security#csp-meta-tag -->
-    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
-    <link href="https://fonts.googleapis.com/css?family=Montserrat|Roboto+Condensed&display=swap" rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="main.css">
-  </head>
-  <body>
-    <div class="directory">
-      <h5 id="directory-header">
-        EXPLORER
-      </h5>
-      <div id="directory-value">
-        current_dir
-      </div>
-      <div class="directory-contents">
-
-      </div>
-    </div>
-    <div class="live">
-    
-    </div>
-    <div class="timeline">
-      
-    </div>
-    <div class="footer">
-      <span>
-        Footer
-      </span>
-      <span>
-        pwd
-      </span>
-    </div>
-  </body>
+    <head>
+        <meta charset="UTF-8" />
+        <!-- https://electronjs.org/docs/tutorial/security#csp-meta-tag -->
+        <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
+        <link
+            href="https://fonts.googleapis.com/css?family=Montserrat|Roboto+Condensed&display=swap"
+            rel="stylesheet"
+        />
+        <link rel="stylesheet" type="text/css" href="main.css" />
+        <script defer src="render.js"></script>
+    </head>
+    <body>
+        <div class="directory">
+            <h5 id="directory-header">
+                EXPLORER
+            </h5>
+            <div id="directory-value">
+                current_dir
+            </div>
+            <ul id="directory-contents"></ul>
+        </div>
+        <div class="live"></div>
+        <div class="timeline">
+            <video id="live-video"></video>
+        </div>
+        <div class="footer">
+            <span id="pwd">
+                Footer
+            </span>
+        </div>
+    </body>
 </html>
