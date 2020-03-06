@@ -27,10 +27,10 @@ I'd like to get vijayo to MVP status eventually.
 
 Pressing additions:
 
-[ ] File I/O
-[ ] Loading in \*.mp4 files
-[ ] Timeline view
-[ ] Exporting
+- [ ] File I/O
+- [ ] Loading in \*.mp4 files
+- [ ] Timeline view
+- [ ] Exporting
 
 ## Contributing:
 
