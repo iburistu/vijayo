@@ -97,6 +97,19 @@ h5 {
     color: #38c955;
 }
 
+#directory-button {
+    padding: none;
+    border: none;
+    background-color: #1985a1;
+    border-radius: 5px;
+    color: #d6d6d6;
+    grid-area: footer;
+}
+
+#directory-button:hover {
+    background-color: #429bb2;
+}
+
 .live {
     grid-area: live;
     background-color: #2b2c33;

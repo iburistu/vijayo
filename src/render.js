@@ -55,7 +55,7 @@ const open_directory_dialog = () => {
 
     dialog.showOpenDialog(main_win, options).then(dir => {
         if (dir.filePaths !== undefined) {
-            console.log(dir.filePaths);
+            document.getElementById('directory-contents').innerHTML = '';
             set_directory_header(dir.filePaths[0]);
             set_footer_text(dir.filePaths[0]);
             get_current_directory_contents(dir.filePaths[0]);
@@ -64,4 +64,6 @@ const open_directory_dialog = () => {
     });
 };
 
-open_directory_dialog();
+document.querySelector('#directory-button').addEventListener('click', event => {
+    open_directory_dialog();
+});
