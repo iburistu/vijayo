@@ -90,6 +90,7 @@ h5 {
 
 .directory-dir {
     text-decoration: underline;
+    cursor: pointer;
 }
 
 .movie-file {
