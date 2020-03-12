@@ -29,7 +29,28 @@ const get_sub_directory_contents = sub_dir => {
             ul.classList.add('sub-directory');
             files.sort().forEach(file => {
                 let li = document.createElement('li');
-                li.innerText = file.toString();
+                let text = document.createElement('span');
+                text.innerText = file.toString();
+                // !TODO make directory detection less flakey
+                if (!path.extname(path.join(__dirname, file.toString())) && !file.toString().includes('.')) {
+                    li.classList.add('directory-dir');
+                    // Add ID so that the directory can be selected later
+                    li.id = file.toString();
+                    // Add click event listener
+                    //text.addEventListener('click', get_sub_directory_contents(path.join(process.cwd(), file.toString())));
+                    text.onclick = get_sub_directory_contents(path.join(sub_dir, file.toString()));
+                    // Is this the best way to add more text?
+                    text.innerText = ' - ' + text.innerText + '/';
+                } else {
+                    text.classList.add('directory-text');
+                }
+                // !TODO add additional movie file extensions here?
+                // Should I be checking MIME types?
+                if (path.extname(path.join(__dirname, file.toString())) === '.mp4') {
+                    li.classList.add('movie-file');
+                }
+
+                li.appendChild(text);
                 ul.appendChild(li);
             });
             parent.appendChild(ul);

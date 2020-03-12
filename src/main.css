@@ -107,6 +107,7 @@ h5 {
 
 .movie-file {
     color: #38c955;
+    cursor: grab;
 }
 
 #directory-button {
