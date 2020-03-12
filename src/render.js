@@ -41,7 +41,6 @@ const get_sub_directory_contents = sub_dir => {
                     text.onclick = get_sub_directory_contents(path.join(sub_dir, file.toString()));
                     // Is this the best way to add more text?
                     text.innerText = ' - ' + text.innerText + '/';
-                } else {
                     text.classList.add('directory-text');
                 }
                 // !TODO add additional movie file extensions here?
@@ -77,7 +76,7 @@ const get_current_directory_contents = dir => {
         files.sort().forEach(file => {
             let li = document.createElement('li');
             let text = document.createElement('span');
-            text.innerText = file.toString();
+            text.innerHTML = file.toString();
             // !TODO make directory detection less flakey
             if (!path.extname(path.join(__dirname, file.toString())) && !file.toString().includes('.')) {
                 li.classList.add('directory-dir');
@@ -88,7 +87,6 @@ const get_current_directory_contents = dir => {
                 text.onclick = get_sub_directory_contents(path.join(process.cwd(), file.toString()));
                 // Is this the best way to add more text?
                 text.innerText = ' - ' + text.innerText + '/';
-            } else {
                 text.classList.add('directory-text');
             }
             // !TODO add additional movie file extensions here?

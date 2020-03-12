@@ -80,17 +80,16 @@ h5 {
     list-style: none;
     margin: 0;
     padding: 0;
+    padding-top: 0.5rem;
     background-color: #2b2c33;
     overflow: auto;
 }
 
 #directory-contents > li {
-    padding-left: 1rem;
-    padding-top: 0.5rem;
+    padding-left: 0.5rem;
 }
 
 .directory-dir {
-    text-decoration: underline;
     cursor: pointer;
     -webkit-touch-callout: none; /* iOS Safari */
     -webkit-user-select: none; /* Safari */
@@ -101,8 +100,8 @@ h5 {
                                   supported by Chrome, Opera and Firefox */
 }
 
-.sub-directory > li {
-    text-decoration: none;
+.directory-text {
+    text-decoration: underline;
 }
 
 .movie-file {
