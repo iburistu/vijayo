@@ -16,6 +16,36 @@ const set_footer_text = text => {
     document.getElementById('pwd').innerText = text;
 };
 
+// Get sub directory contents
+// !TODO create generic directory generation function
+const get_sub_directory_contents = sub_dir => {
+    return () => {
+        fs.readdir(sub_dir, (err, files) => {
+            if (err) return console.error(`Unable to scan sub-directory: ${err}`);
+            let parent = document.getElementById(sub_dir.split('\\').slice(-1)[0]);
+            let span = parent.childNodes[0];
+            span.onclick = remove_sub_directory_contents(sub_dir);
+            let ul = document.createElement('ul');
+            ul.classList.add('sub-directory');
+            files.sort().forEach(file => {
+                let li = document.createElement('li');
+                li.innerText = file.toString();
+                ul.appendChild(li);
+            });
+            parent.appendChild(ul);
+        });
+    };
+};
+
+const remove_sub_directory_contents = sub_dir => {
+    return () => {
+        const current_dir = sub_dir.split('\\').slice(-1)[0];
+        let parent = document.getElementById(current_dir);
+        if (parent.childNodes[1] !== undefined) parent.removeChild(parent.childNodes[1]);
+        parent.childNodes[0].onclick = get_sub_directory_contents(path.join(process.cwd(), current_dir));
+    };
+};
+
 // Get the current directory contents and add them to the sidebar
 const get_current_directory_contents = dir => {
     fs.readdir(dir, function(err, files) {
@@ -23,17 +53,22 @@ const get_current_directory_contents = dir => {
             return console.error('Unable to scan directory: ' + err);
         }
         // Sort the files
-        files.sort().forEach(function(file) {
+        files.sort().forEach(file => {
             let li = document.createElement('li');
             let text = document.createElement('span');
             text.innerText = file.toString();
             // !TODO make directory detection less flakey
             if (!path.extname(path.join(__dirname, file.toString())) && !file.toString().includes('.')) {
                 li.classList.add('directory-dir');
+                // Add ID so that the directory can be selected later
+                li.id = file.toString();
+                // Add click event listener
+                //text.addEventListener('click', get_sub_directory_contents(path.join(process.cwd(), file.toString())));
+                text.onclick = get_sub_directory_contents(path.join(process.cwd(), file.toString()));
                 // Is this the best way to add more text?
                 text.innerText = ' - ' + text.innerText + '/';
             } else {
-                text.classList.add('directory-file');
+                text.classList.add('directory-text');
             }
             // !TODO add additional movie file extensions here?
             // Should I be checking MIME types?
@@ -64,6 +99,4 @@ const open_directory_dialog = () => {
     });
 };
 
-document.querySelector('#directory-button').addEventListener('click', event => {
-    open_directory_dialog();
-});
+document.querySelector('#directory-button').addEventListener('click', open_directory_dialog);
