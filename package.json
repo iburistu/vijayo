@@ -28,6 +28,7 @@
                 {
                     "name": "@electron-forge/maker-zip",
                     "platforms": [
+                        "win32",
                         "darwin"
                     ]
                 },
