@@ -1,4 +1,5 @@
 const { app, BrowserWindow, Menu } = require('electron');
+const path = require('path');
 const isMac = process.platform === 'darwin';
 
 const template = [
@@ -93,6 +94,12 @@ const template = [
 const menu = Menu.buildFromTemplate(template);
 Menu.setApplicationMenu(menu);
 
+// Handle creating/removing shortcuts on Windows when installing/uninstalling.
+if (require('electron-squirrel-startup')) {
+    // eslint-disable-line global-require
+    app.quit();
+}
+
 // Global so that other processes can access the root menu
 let main_win;
 
@@ -110,7 +117,7 @@ function createMainWindow() {
     });
 
     // and load the index.html of the app.
-    main_win.loadFile('index.html');
+    main_win.loadFile(path.join(__dirname, 'index.html'));
 }
 
 // This method will be called when Electron has finished

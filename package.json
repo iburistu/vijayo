@@ -8,14 +8,50 @@
         "url": "https://linkletter.dev"
     },
     "license": "MIT",
-    "main": "index.js",
+    "main": "src/index.js",
     "scripts": {
-        "start": "electron ./src"
+        "start": "electron-forge start",
+        "package": "electron-forge package",
+        "make": "electron-forge make",
+        "publish": "electron-forge publish"
     },
-    "devDependencies": {
-        "electron": "^8.0.3"
+    "config": {
+        "forge": {
+            "packagerConfig": {},
+            "makers": [
+                {
+                    "name": "@electron-forge/maker-squirrel",
+                    "config": {
+                        "name": "vijayo"
+                    }
+                },
+                {
+                    "name": "@electron-forge/maker-zip",
+                    "platforms": [
+                        "darwin"
+                    ]
+                },
+                {
+                    "name": "@electron-forge/maker-deb",
+                    "config": {}
+                },
+                {
+                    "name": "@electron-forge/maker-rpm",
+                    "config": {}
+                }
+            ]
+        }
     },
     "dependencies": {
+        "electron-squirrel-startup": "^1.0.0"
+    },
+    "devDependencies": {
+        "@electron-forge/cli": "6.0.0-beta.50",
+        "@electron-forge/maker-deb": "6.0.0-beta.50",
+        "@electron-forge/maker-rpm": "6.0.0-beta.50",
+        "@electron-forge/maker-squirrel": "6.0.0-beta.50",
+        "@electron-forge/maker-zip": "6.0.0-beta.50",
+        "electron": "^8.0.3",
         "husky": "^4.2.3",
         "prettier": "^1.19.1",
         "pretty-quick": "^2.0.1"
