@@ -1,5 +1,3 @@
-import './main.css';
-
 const { remote } = require('electron');
 const { dialog } = require('electron').remote;
 const fs = require('fs');

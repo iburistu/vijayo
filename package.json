@@ -8,7 +8,7 @@
         "url": "https://linkletter.dev"
     },
     "license": "MIT",
-    "main": ".webpack/main",
+    "main": "src/index.js",
     "scripts": {
         "start": "electron-forge start",
         "package": "electron-forge package",
@@ -39,24 +39,6 @@
                     "name": "@electron-forge/maker-rpm",
                     "config": {}
                 }
-            ],
-            "plugins": [
-                [
-                    "@electron-forge/plugin-webpack",
-                    {
-                        "mainConfig": "./config/webpack.main.config.js",
-                        "renderer": {
-                            "config": "./config/webpack.renderer.config.js",
-                            "entryPoints": [
-                                {
-                                    "html": "./src/index.html",
-                                    "js": "./src/render.js",
-                                    "name": "main_win"
-                                }
-                            ]
-                        }
-                    }
-                ]
             ]
         }
     },

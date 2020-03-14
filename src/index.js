@@ -117,7 +117,7 @@ function createMainWindow() {
     });
 
     // and load the index.html of the app.
-    main_win.loadURL(MAIN_WIN_WEBPACK_ENTRY);
+    main_win.loadURL(path.join(__dirname, 'index.html'));
     // Start DevTools
     main_win.webContents.openDevTools();
 }
