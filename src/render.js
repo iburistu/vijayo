@@ -118,4 +118,4 @@ const open_directory_dialog = () => {
     });
 };
 
-document.querySelector('#directory-button').addEventListener('click', open_directory_dialog);
+document.getElementById('directory-button').addEventListener('click', open_directory_dialog);
