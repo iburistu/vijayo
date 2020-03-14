@@ -117,7 +117,9 @@ function createMainWindow() {
     });
 
     // and load the index.html of the app.
-    main_win.loadFile(path.join(__dirname, 'index.html'));
+    //    main_win.loadFile(path.join(__dirname, 'index.html'));
+    main_win.loadURL(MAIN_WIN_WEBPACK_ENTRY);
+    main_win.webContents.openDevTools();
 }
 
 // This method will be called when Electron has finished
