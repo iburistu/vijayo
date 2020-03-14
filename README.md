@@ -10,7 +10,7 @@ vijayo is **not**:
 
 vijayo aims to be simple and easy to use. Nothing more, nothing less.
 
-## Testing vijayo:
+## Building vijayo:
 
 `yarn` is preferred.
 
@@ -19,7 +19,15 @@ $ yarn install
 $ yarn start
 ```
 
-I haven't added an Electron build tool yet. I'll update this document when it can _actually_ be built.
+`electron-forge` is the build tool for vijayo. To package vijayo for release, run
+
+```sh
+$ yarn package
+$ yarn make
+$ yarn publish
+```
+
+I still haven't added icons yet. I'll get to that eventually.
 
 ## Roadmap:
 
@@ -27,10 +35,10 @@ I'd like to get vijayo to MVP status eventually.
 
 Pressing additions:
 
-- [ ] File I/O
-- [ ] Loading in \*.mp4 files
-- [ ] Timeline view
-- [ ] Exporting
+-   [ ] File I/O
+-   [ ] Loading in \*.mp4 files
+-   [ ] Timeline view
+-   [ ] Exporting
 
 ## Contributing:
 
