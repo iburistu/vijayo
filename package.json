@@ -1,5 +1,6 @@
 {
     "name": "vijayo",
+    "productName": "vijayo",
     "version": "0.0.1",
     "description": "Open source video editor built with Electron",
     "author": {
@@ -28,7 +29,6 @@
                 {
                     "name": "@electron-forge/maker-zip",
                     "platforms": [
-                        "win32",
                         "darwin"
                     ]
                 },
