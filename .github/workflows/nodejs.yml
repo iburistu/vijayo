@@ -21,7 +21,7 @@ jobs:
       env:
         CI: true
     - name: Upload Windows binary
-      uses: actions/upload-artifact@v1.0.0
+      uses: actions/upload-artifact@v2-preview
       with:
         name: vijayo-win-unstable
-        path: /out/make/squirrel.windows/x64/*.exe
+        path: out/make/squirrel.windows/x64/*
