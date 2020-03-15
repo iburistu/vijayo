@@ -7,8 +7,8 @@ on:
     branches: [ master ]
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  build-win:
+    runs-on: [windows]
     steps:
     - uses: actions/checkout@v2
     - name: Use Node.js 12
@@ -20,3 +20,8 @@ jobs:
     - run: yarn make
       env:
         CI: true
+    - name: Upload Windows binary
+      uses: actions/upload-artifact@v1.0.0
+      with:
+        name: vijayo-win-unstable
+        path: /out/make/squirrel.windows/x64/*.exe
