@@ -4,7 +4,7 @@ const electronPath = require('electron'); // Require Electron from the binaries 
 const path = require('path');
 
 describe('Application launch', function() {
-    this.timeout(10000);
+    this.timeout('60s');
 
     beforeEach(function() {
         this.app = new Application({
