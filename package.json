@@ -11,6 +11,7 @@
     "license": "MIT",
     "main": "src/index.js",
     "scripts": {
+        "test": "mocha",
         "start": "electron-forge start",
         "package": "electron-forge package",
         "make": "electron-forge make",
@@ -40,11 +41,22 @@
                     "name": "@electron-forge/maker-rpm",
                     "config": {}
                 }
+            ],
+            "publishers": [
+                {
+                    "name": "@electron-forge/publisher-github",
+                    "config": {
+                        "repository": {
+                            "owner": "iburistu",
+                            "name": "vijayo"
+                        },
+                        "prerelease": true
+                    }
+                }
             ]
         }
     },
     "dependencies": {
-        "dayjs": "^1.8.23",
         "electron-squirrel-startup": "^1.0.0"
     },
     "devDependencies": {
@@ -53,9 +65,13 @@
         "@electron-forge/maker-rpm": "6.0.0-beta.50",
         "@electron-forge/maker-squirrel": "6.0.0-beta.50",
         "@electron-forge/maker-zip": "6.0.0-beta.50",
+        "@electron-forge/publisher-github": "^6.0.0-beta.50",
+        "dayjs": "^1.8.23",
         "electron": "^8.0.3",
         "husky": "^4.2.3",
+        "mocha": "^7.1.0",
         "prettier": "^1.19.1",
-        "pretty-quick": "^2.0.1"
+        "pretty-quick": "^2.0.1",
+        "spectron": "^10.0.1"
     }
 }
