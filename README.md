@@ -1,4 +1,4 @@
-# vijayo (vih-JAY-oh)
+# vijayo (vih-JAY-oh) ![Build CI](https://github.com/iburistu/vijayo/workflows/Build%20CI/badge.svg?branch=master)
 
 vijayo is an open source video editor written in Electron and powered by FFmpeg ported to WebAssembly.
 
@@ -24,7 +24,6 @@ $ yarn start
 ```sh
 $ yarn package
 $ yarn make
-$ yarn publish
 ```
 
 I still haven't added icons yet. I'll get to that eventually.
@@ -35,10 +34,31 @@ I'd like to get vijayo to MVP status eventually.
 
 Pressing additions:
 
--   [ ] File I/O
--   [ ] Loading in \*.mp4 files
+-   [x] File I/O
+-   [x] Loading in \*.mp4 files
+-   [x] Video controls
 -   [ ] Timeline view
 -   [ ] Exporting
+
+### File I/O
+
+File I/O is _effectively_ done. It's hanging on by a thread though. Right now there's some janky code that's enabling the I/O to work, and I'd like to fix it up eventually. Additionally, it could use some styling flair. Drag and drop maybe?
+
+### Loading in \*.mp4 files
+
+This is primarily done. I'd like to add tabs of all the currently open files with details about each. This might require `FFmpeg` to get all the metadata I want. Right now all it does is basic (think very basic) metadata scanning.
+
+### Video Controls
+
+There are very basic video controls. Play/pause works, rewind works, and fast-forward works. I'm not a huge fan of the implementation, but it just needs to work. Refactoring is necessary.
+
+### Timeline View
+
+N/A
+
+### Exporting
+
+N/A
 
 ## Contributing:
 
