@@ -3,8 +3,16 @@ const { dialog } = require('electron').remote;
 const fs = require('fs');
 const path = require('path');
 const process = require('process');
+const dayjs = require('dayjs');
 
 const main_win = remote.getCurrentWindow();
+const video = document.getElementById('live-video');
+const playPause = document.getElementById('play-pause');
+const playPauseSVG = playPause.childNodes[1];
+const fastForward = document.getElementById('fast-forward');
+const rewind = document.getElementById('rewind');
+
+video.controls = false;
 
 // Get the current directory name (only the folder name)
 const set_directory_header = directory => {
@@ -91,8 +99,9 @@ const get_current_directory_contents = dir => {
             }
             // !TODO add additional movie file extensions here?
             // Should I be checking MIME types?
-            if (path.extname(path.join(__dirname, file.toString())) === '.mp4') {
+            if (path.extname(path.join(process.cwd(), file.toString())) === '.mp4') {
                 li.classList.add('movie-file');
+                text.onclick = open_movie_file(path.join(process.cwd(), file.toString()));
             }
 
             li.appendChild(text);
@@ -110,12 +119,45 @@ const open_directory_dialog = () => {
     dialog.showOpenDialog(main_win, options).then(dir => {
         if (dir.filePaths !== undefined) {
             document.getElementById('directory-contents').innerHTML = '';
+            process.chdir(dir.filePaths[0]);
             set_directory_header(dir.filePaths[0]);
             set_footer_text(dir.filePaths[0]);
             get_current_directory_contents(dir.filePaths[0]);
-            process.chdir(dir.filePaths[0]);
         }
     });
 };
 
+const open_movie_file = file => {
+    return () => video.setAttribute('src', file);
+};
+
 document.getElementById('directory-button').addEventListener('click', open_directory_dialog);
+
+playPause.addEventListener('click', () => {
+    video.playbackRate = 1;
+    if (video.paused || video.ended) {
+        playPauseSVG.setAttribute('d', 'M6 19h4V5H6v14zm8-14v14h4V5h-4z');
+        video.play().catch(console.warn);
+    } else {
+        playPauseSVG.setAttribute('d', 'M8 5v14l11-7z');
+        video.pause();
+    }
+});
+
+fastForward.addEventListener('click', () => {
+    video.playbackRate += 0.5;
+});
+
+rewind.addEventListener('click', () => {
+    if (video.currentTime >= 5) {
+        video.currentTime -= 5;
+    }
+});
+
+video.addEventListener('loadedmetadata', () => {
+    document.getElementById('video-length').innerText = `0:00:00 / ${video.duration}`;
+});
+
+video.addEventListener('timeupdate', () => {
+    document.getElementById('video-length').innerText = `${video.currentTime} / ${video.duration}`;
+});

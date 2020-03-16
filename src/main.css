@@ -140,7 +140,6 @@ h6 {
         'detail-content';
     grid-template-rows: 30px 1fr;
     grid-template-columns: auto;
-    align-items: center;
     justify-items: left;
     height: 100%;
     width: 100%;
@@ -148,6 +147,11 @@ h6 {
 
 #video-details-header {
     grid-area: detail-header;
+    padding-left: 1em;
+    align-self: center;
+}
+
+.video-details-container {
     padding-left: 1em;
 }
 
@@ -179,6 +183,7 @@ h6 {
     background: black;
     width: 100%;
     height: 100%;
+    object-fit: cover;
 }
 
 .timeline {

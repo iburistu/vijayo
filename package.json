@@ -44,6 +44,7 @@
         }
     },
     "dependencies": {
+        "dayjs": "^1.8.23",
         "electron-squirrel-startup": "^1.0.0"
     },
     "devDependencies": {
