@@ -28,6 +28,16 @@ $ yarn make
 
 I still haven't added icons yet. I'll get to that eventually.
 
+## Testing vijayo:
+
+You can test vijayo with
+
+```sh
+$ yarn test
+```
+
+`mocha` and `spectron` are used to test vijayo. These tests cannot currently be run inside of the Github action CI/CD pipeline. `husky` has a `pre-push` hook that runs `yarn test`.
+
 ## Roadmap:
 
 I'd like to get vijayo to MVP status eventually.
@@ -40,23 +50,23 @@ Pressing additions:
 -   [ ] Timeline view
 -   [ ] Exporting
 
-### File I/O
+### File I/O:
 
 File I/O is _effectively_ done. It's hanging on by a thread though. Right now there's some janky code that's enabling the I/O to work, and I'd like to fix it up eventually. Additionally, it could use some styling flair. Drag and drop maybe?
 
-### Loading in \*.mp4 files
+### Loading in \*.mp4 files:
 
 This is primarily done. I'd like to add tabs of all the currently open files with details about each. This might require `FFmpeg` to get all the metadata I want. Right now all it does is basic (think very basic) metadata scanning.
 
-### Video Controls
+### Video Controls:
 
 There are very basic video controls. Play/pause works, rewind works, and fast-forward works. I'm not a huge fan of the implementation, but it just needs to work. Refactoring is necessary.
 
-### Timeline View
+### Timeline View:
 
 N/A
 
-### Exporting
+### Exporting:
 
 N/A
 

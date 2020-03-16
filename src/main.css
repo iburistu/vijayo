@@ -17,10 +17,6 @@ body {
     color: #d6d6d6;
 }
 
-/* ::-webkit-resizer {
-    display: none;
-} */
-
 ::-webkit-scrollbar-track {
     background-color: #22232a;
 }
@@ -92,13 +88,7 @@ h6 {
 
 .directory-dir {
     cursor: pointer;
-    -webkit-touch-callout: none; /* iOS Safari */
-    -webkit-user-select: none; /* Safari */
-    -khtml-user-select: none; /* Konqueror HTML */
-    -moz-user-select: none; /* Old versions of Firefox */
-    -ms-user-select: none; /* Internet Explorer/Edge */
-    user-select: none; /* Non-prefixed version, currently
-                                  supported by Chrome, Opera and Firefox */
+    user-select: none;
 }
 
 .directory-text {
@@ -190,9 +180,6 @@ h6 {
     grid-area: timeline;
     background-color: #22232a;
     border-top: 1px solid black;
-    overflow-y: auto;
-    overflow-x: hidden;
-
     display: grid;
     grid-template-areas:
         'content'
@@ -204,11 +191,26 @@ h6 {
 .timeline-content {
     grid-area: content;
     padding: 1em;
+    overflow: auto;
+}
+
+.timeline-video-element {
+    background-color: #1985a1;
+    border-radius: 10px;
+    height: 75px;
+}
+
+.timeline-audio-element {
+    background-color: #38c955;
+    border-radius: 5px;
+    height: 15px;
 }
 
 .timeline-footer {
     grid-area: timeline-footer;
     background-color: #2b2c33;
+    color: #b0b0b0;
+    padding-left: 1em;
 }
 
 .footer {

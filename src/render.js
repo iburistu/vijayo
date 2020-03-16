@@ -3,7 +3,6 @@ const { dialog } = require('electron').remote;
 const fs = require('fs');
 const path = require('path');
 const process = require('process');
-const dayjs = require('dayjs');
 
 const main_win = remote.getCurrentWindow();
 const video = document.getElementById('live-video');
@@ -145,19 +144,43 @@ playPause.addEventListener('click', () => {
 });
 
 fastForward.addEventListener('click', () => {
-    video.playbackRate += 0.5;
+    video.playbackRate *= 2;
 });
 
 rewind.addEventListener('click', () => {
     if (video.currentTime >= 5) {
         video.currentTime -= 5;
+    } else {
+        video.currentTime = 0;
     }
 });
 
+const convert_secs_to_hms = duration => {
+    let hours = ~~(duration / 3600);
+    let minutes = ~~(duration / 60) - 60 * hours;
+    let seconds = ~~(duration % 60);
+
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds
+        .toString()
+        .padStart(2, '0')}`;
+};
+
 video.addEventListener('loadedmetadata', () => {
-    document.getElementById('video-length').innerText = `0:00:00 / ${video.duration}`;
+    document.getElementById('video-length').innerText = `00:00:00 / ${convert_secs_to_hms(video.duration)}`;
+
+    let div = document.createElement('div');
+    div.setAttribute('style', `width: ${~~video.duration * 10}px`);
+    div.classList.add('timeline-video-element');
+    document.getElementById('timeline-content').appendChild(div);
+
+    div = document.createElement('div');
+    div.setAttribute('style', `width: ${~~video.duration * 10}px`);
+    div.classList.add('timeline-audio-element');
+    document.getElementById('timeline-content').appendChild(div);
 });
 
 video.addEventListener('timeupdate', () => {
-    document.getElementById('video-length').innerText = `${video.currentTime} / ${video.duration}`;
+    document.getElementById('video-length').innerText = `${convert_secs_to_hms(
+        video.currentTime
+    )} / ${convert_secs_to_hms(video.duration)}`;
 });
