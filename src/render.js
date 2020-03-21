@@ -3,6 +3,7 @@ const { dialog } = require('electron').remote;
 const fs = require('fs');
 const path = require('path');
 const process = require('process');
+const ffmpeg = require('ffmpeg.js');
 
 const main_win = remote.getCurrentWindow();
 const video = document.getElementById('live-video');
@@ -54,6 +55,7 @@ const get_sub_directory_contents = sub_dir => {
                 // Should I be checking MIME types?
                 if (path.extname(path.join(__dirname, file.toString())) === '.mp4') {
                     li.classList.add('movie-file');
+                    text.onclick = open_movie_file(path.join(sub_dir, file.toString()));
                 }
 
                 li.appendChild(text);
@@ -127,6 +129,7 @@ const open_directory_dialog = () => {
 };
 
 const open_movie_file = file => {
+    console.log(file);
     return () => video.setAttribute('src', file);
 };
 
@@ -165,6 +168,31 @@ const convert_secs_to_hms = duration => {
         .padStart(2, '0')}`;
 };
 
+/* const audioContext = new AudioContext();
+
+const filter_data = audio_buffer => {
+    // Get first channel of audio
+    const rawData = audio_buffer.getChannelData(0);
+    // The number of samples is the duration of the video in seconds
+    const samples = video.duration;
+    const blockSize = ~~(rawData.length / samples);
+    const filteredData = [];
+    for (let i = 0; i < samples; i++) {
+        // Location of first sample in the block
+        let blockStart = blockSize * i;
+        let sum = 0;
+        // Find the sum of all the samples in the block
+        for (let j = 0; j < blockSize; j++) {
+          sum = sum + Math.abs(rawData[blockStart + j]);
+        }
+        // Get the average over that block
+        filteredData.push(sum / blockSize); 
+    }
+    // Normalize the data
+    const multiplier = Math.pow(Math.max(...filteredData), -1);
+    return filteredData.map(v => v * multiplier);
+} */
+
 video.addEventListener('loadedmetadata', () => {
     document.getElementById('video-length').innerText = `00:00:00 / ${convert_secs_to_hms(video.duration)}`;
 
@@ -173,10 +201,20 @@ video.addEventListener('loadedmetadata', () => {
     div.classList.add('timeline-video-element');
     document.getElementById('timeline-content').appendChild(div);
 
-    div = document.createElement('div');
-    div.setAttribute('style', `width: ${~~video.duration * 10}px`);
-    div.classList.add('timeline-audio-element');
-    document.getElementById('timeline-content').appendChild(div);
+    var stderr = '',
+        stdout = '';
+    ffmpeg({
+        arguments: ['-version'],
+        print: function(data) {
+            stdout += data + '\n';
+        },
+        printErr: function(data) {
+            stderr += data + '\n';
+        },
+        onExit: function(code) {
+            console.log(stdout);
+        },
+    });
 });
 
 video.addEventListener('timeupdate', () => {

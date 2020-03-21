@@ -19,12 +19,15 @@
     },
     "config": {
         "forge": {
-            "packagerConfig": {},
+            "packagerConfig": {
+                "icon": "static/icon.ico"
+            },
             "makers": [
                 {
                     "name": "@electron-forge/maker-squirrel",
                     "config": {
-                        "name": "vijayo"
+                        "name": "vijayo",
+                        "setupIcon": "static/icon.ico"
                     }
                 },
                 {
@@ -57,7 +60,8 @@
         }
     },
     "dependencies": {
-        "electron-squirrel-startup": "^1.0.0"
+        "electron-squirrel-startup": "^1.0.0",
+        "ffmpeg.js": "^3.1.9001"
     },
     "devDependencies": {
         "@electron-forge/cli": "6.0.0-beta.50",

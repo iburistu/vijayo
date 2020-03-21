@@ -1603,6 +1603,11 @@ fd-slicer@~1.0.1:
   dependencies:
     pend "~1.2.0"
 
+ffmpeg.js@^3.1.9001:
+  version "3.1.9001"
+  resolved "https://registry.yarnpkg.com/ffmpeg.js/-/ffmpeg.js-3.1.9001.tgz#3569b993027667feea22a2a6dc2b1350fbb9f9c1"
+  integrity sha1-NWm5kwJ2Z/7qIqKm3CsTUPu5+cE=
+
 figures@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/figures/-/figures-2.0.0.tgz#3ab1a2d2a62c8bfb431a0c94cb797a2fce27c962"

@@ -1,4 +1,8 @@
-# vijayo (vih-JAY-oh) ![Build CI](https://github.com/iburistu/vijayo/workflows/Build%20CI/badge.svg?branch=master)
+# vijayo (vih-JAY-oh) ![Test CI](https://github.com/iburistu/vijayo/workflows/Test%20CI/badge.svg) ![Build CI](https://github.com/iburistu/vijayo/workflows/Build%20CI/badge.svg)
+
+![vijayo](static/icon.png)
+
+Icon by [Spencer Goulette](https://github.com/SpencerGoulette)
 
 vijayo is an open source video editor written in Electron and powered by FFmpeg ported to WebAssembly.
 
@@ -36,7 +40,7 @@ You can test vijayo with
 $ yarn test
 ```
 
-`mocha` and `spectron` are used to test vijayo. These tests cannot currently be run inside of the Github action CI/CD pipeline. `husky` has a `pre-push` hook that runs `yarn test`.
+`mocha` and `spectron` are used to test vijayo. These tests cannot currently be run inside of the Github action CI/CD pipeline. Don't know how to fix that!
 
 ## Roadmap:
 
