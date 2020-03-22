@@ -185,25 +185,41 @@ h6 {
         'content'
         'timeline-footer';
     grid-template-columns: 1fr;
-    grid-template-rows: auto 20px;
+    grid-template-rows: 1fr 20px;
+    overflow: auto;
 }
 
 .timeline-content {
     grid-area: content;
     padding: 1em;
-    overflow: auto;
+    display: flex;
+    flex-direction: column;
 }
 
 .timeline-video-element {
     background-color: #1985a1;
     border-radius: 10px;
-    height: 75px;
+    height: 50px;
+    width: 100%;
+    grid-column: 1 / 13;
 }
 
 .timeline-audio-element {
     background-color: #38c955;
     border-radius: 5px;
     height: 15px;
+}
+
+.timeline-element-wrapper {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-template-rows: 80px;
+    align-items: center;
+}
+
+.timeline-header {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
 }
 
 .timeline-footer {

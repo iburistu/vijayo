@@ -129,8 +129,10 @@ const open_directory_dialog = () => {
 };
 
 const open_movie_file = file => {
-    console.log(file);
-    return () => video.setAttribute('src', file);
+    return () => {
+        video.setAttribute('src', file);
+        video.setAttribute('type', `video/${file.split('.').slice(-1)[0]}`);
+    };
 };
 
 document.getElementById('directory-button').addEventListener('click', open_directory_dialog);
@@ -168,53 +170,85 @@ const convert_secs_to_hms = duration => {
         .padStart(2, '0')}`;
 };
 
-/* const audioContext = new AudioContext();
+/* function getVideoImage(path, secs, callback) {
+    var me = this, video = document.createElement('video');
+    video.onloadedmetadata = function() {
+      if ('function' === typeof secs) {
+        secs = secs(this.duration);
+      }
+      this.currentTime = Math.min(Math.max(0, (secs < 0 ? this.duration : 0) + secs), this.duration);
+    };
+    video.onseeked = function(e) {
+      var canvas = document.createElement('canvas');
+      canvas.height = video.videoHeight * 0.125;
+      canvas.width = video.videoWidth * 0.15;
+      var ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      var img = new Image();
+      img.crossOrigin = "anonymous"
+      img.src = canvas.toDataURL();
+      callback.call(me, img, this.currentTime, e);
+    };
+    video.onerror = function(e) {
+      callback.call(me, undefined, undefined, e);
+    };
+    video.src = path;
+}
 
-const filter_data = audio_buffer => {
-    // Get first channel of audio
-    const rawData = audio_buffer.getChannelData(0);
-    // The number of samples is the duration of the video in seconds
-    const samples = video.duration;
-    const blockSize = ~~(rawData.length / samples);
-    const filteredData = [];
-    for (let i = 0; i < samples; i++) {
-        // Location of first sample in the block
-        let blockStart = blockSize * i;
-        let sum = 0;
-        // Find the sum of all the samples in the block
-        for (let j = 0; j < blockSize; j++) {
-          sum = sum + Math.abs(rawData[blockStart + j]);
+function showImageAt(secs, div, src) {
+    var duration;
+    getVideoImage(
+      src,
+      function(totalTime) {
+        duration = totalTime;
+        return secs;
+      },
+      function(img, secs, event) {
+        if (event.type == 'seeked') {
+            div.appendChild(img);
         }
-        // Get the average over that block
-        filteredData.push(sum / blockSize); 
-    }
-    // Normalize the data
-    const multiplier = Math.pow(Math.max(...filteredData), -1);
-    return filteredData.map(v => v * multiplier);
-} */
+      }
+    );
+  } */
 
 video.addEventListener('loadedmetadata', () => {
     document.getElementById('video-length').innerText = `00:00:00 / ${convert_secs_to_hms(video.duration)}`;
+    let timeline = document.getElementById('timeline-content');
+    // Each row is 60 seconds
+    // Generate a new row for each 60 second break
+    let overflow = video.duration % 60;
+    let rows = ~~(video.duration / 60);
+    let div, timeline_wrapper;
+    //let last_time = 0;
+    for (let i = 0; i < rows; i++) {
+        timeline_wrapper = document.createElement('div');
+        timeline_wrapper.classList.add('timeline-element-wrapper');
 
-    let div = document.createElement('div');
-    div.setAttribute('style', `width: ${~~video.duration * 10}px`);
-    div.classList.add('timeline-video-element');
-    document.getElementById('timeline-content').appendChild(div);
+        div = document.createElement('div');
+        div.classList.add('timeline-video-element');
+        /* for (let j = 0; j < 5; j++) {
+            last_time = (60 * i) + j;
+            showImageAt(last_time, div, video.src); 
+        } */
 
-    var stderr = '',
-        stdout = '';
-    ffmpeg({
-        arguments: ['-version'],
-        print: function(data) {
-            stdout += data + '\n';
-        },
-        printErr: function(data) {
-            stderr += data + '\n';
-        },
-        onExit: function(code) {
-            console.log(stdout);
-        },
-    });
+        timeline_wrapper.appendChild(div);
+        timeline.appendChild(timeline_wrapper);
+    }
+
+    // If overflow is not zero, append the last row
+    if (overflow) {
+        timeline_wrapper = document.createElement('div');
+        timeline_wrapper.classList.add('timeline-element-wrapper');
+
+        div = document.createElement('div');
+        div.classList.add('timeline-video-element');
+        div.setAttribute('style', `width: ${~~((overflow / 60) * 100)}%`);
+        /*         for (let i = 0; i < 5; i++) {
+            showImageAt(last_time + i, div, video.src);
+        }  */
+        timeline_wrapper.appendChild(div);
+        timeline.appendChild(timeline_wrapper);
+    }
 });
 
 video.addEventListener('timeupdate', () => {
