@@ -218,7 +218,7 @@ video.addEventListener('loadedmetadata', () => {
     // Generate a new row for each 60 second break
     let overflow = video.duration % 60;
     let rows = ~~(video.duration / 60);
-    let div, timeline_wrapper;
+    let div, timeline_wrapper, span;
     //let last_time = 0;
     for (let i = 0; i < rows; i++) {
         timeline_wrapper = document.createElement('div');
@@ -230,7 +230,10 @@ video.addEventListener('loadedmetadata', () => {
             last_time = (60 * i) + j;
             showImageAt(last_time, div, video.src); 
         } */
-
+        /*         span = document.createElement('span');
+        span.innerText = i;
+        
+        timeline_wrapper.appendChild(span); */
         timeline_wrapper.appendChild(div);
         timeline.appendChild(timeline_wrapper);
     }
@@ -246,13 +249,30 @@ video.addEventListener('loadedmetadata', () => {
         /*         for (let i = 0; i < 5; i++) {
             showImageAt(last_time + i, div, video.src);
         }  */
+
+        /*         span = document.createElement('span');
+        span.innerText = rows;
+        
+        timeline_wrapper.appendChild(span); */
         timeline_wrapper.appendChild(div);
         timeline.appendChild(timeline_wrapper);
     }
 });
 
+const update_scrubber = () => {
+    document
+        .getElementById('vertical-line')
+        .setAttribute(
+            'style',
+            `left: min(${(video.currentTime % 60) * 1.6666666}%, 100%); top: ${~~(video.currentTime / 60) * 80 + 20}px`
+        );
+    //document.getElementById('vertical-line').setAttribute('style', `left: 100%; top: ${~~(video.currentTime / 60) * 80 + 20}px`);
+};
+
 video.addEventListener('timeupdate', () => {
     document.getElementById('video-length').innerText = `${convert_secs_to_hms(
         video.currentTime
     )} / ${convert_secs_to_hms(video.duration)}`;
+
+    window.requestAnimationFrame(update_scrubber);
 });
