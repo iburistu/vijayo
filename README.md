@@ -30,7 +30,7 @@ $ yarn package
 $ yarn make
 ```
 
-I still haven't added icons yet. I'll get to that eventually.
+~~I still haven't added icons yet. I'll get to that eventually.~~ Big thank you to Spencer!
 
 ## Testing vijayo:
 
@@ -68,7 +68,7 @@ There are very basic video controls. Play/pause works, rewind works, and fast-fo
 
 ### Timeline View:
 
-N/A
+Work in progress. Need to add a few more things and some sort of vertical line to indicate progress but we're getting there.
 
 ### Exporting:
 
