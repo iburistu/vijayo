@@ -1,11 +1,12 @@
 html,
-body {
+body,
+#root {
     height: 100vh;
     width: 100vw;
     margin: 0;
 }
 
-body {
+#root {
     display: grid;
     grid-template-areas:
         'directory live'
@@ -126,23 +127,31 @@ h6 {
 .video-details {
     display: grid;
     grid-template-areas:
-        'detail-header'
-        'detail-content';
-    grid-template-rows: 30px 1fr;
-    grid-template-columns: auto;
+        'tabs'
+        'content';
+    grid-template-rows: 40px 1fr;
+    grid-template-columns: 1fr;
     justify-items: left;
     height: 100%;
     width: 100%;
 }
 
-#video-details-header {
-    grid-area: detail-header;
-    padding-left: 1em;
-    align-self: center;
+.video-details-tabs {
+    width: 100%;
+    grid-area: tabs;
+    background-color: rebeccapurple;
+    display: grid;
+    grid-template-rows: 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(75px, 1fr));
+    align-items: center;
+    justify-items: left;
 }
 
-.video-details-container {
-    padding-left: 1em;
+.video-details-tabs > div {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    width: 100%;
 }
 
 .live-container {
@@ -189,7 +198,7 @@ h6 {
 
 .timeline-content {
     grid-area: content;
-    padding: 1em;
+    padding: 0.5em;
     display: flex;
     flex-direction: column;
 }
@@ -244,7 +253,7 @@ h6 {
     background-color: #1e1f26;
     color: #b0b0b0;
     border-top: 1px solid black;
-    padding: 0 1em;
+    padding: 0 0.5em;
     font-size: small;
 
     display: flex;
