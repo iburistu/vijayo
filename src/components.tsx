@@ -5,27 +5,29 @@ import { isDir, getDirContents, getBasename, sec2hms } from './utils';
 
 type DirProps = {
     dirPath: string;
-    handleVideoChange: any;
+    onVideoChange: any;
 };
 
 type ExplorerProps = {
     currentDir?: string;
-    handleVideoChange: any;
+    onVideoChange: any;
 };
 
 type LiveProps = {
     video: React.MutableRefObject<any>;
+    onLoadMetadata: any;
+    onTimeChange: any;
 };
 
-const generateDirectories = (pathName: string, e: string, handleVideoChange: any): JSX.Element => {
+const generateDirectories = (pathName: string, e: string, onVideoChange: any): JSX.Element => {
     if (isDir(path.join(pathName, e.toString()))) {
-        return <Dir dirPath={path.join(pathName, e.toString())} handleVideoChange={handleVideoChange} />;
+        return <Dir dirPath={path.join(pathName, e.toString())} onVideoChange={onVideoChange} />;
     }
     if (path.extname(e) === '.mp4') {
         return (
             <li
                 className={'movie-file'}
-                onClick={() => handleVideoChange(path.join(pathName, e.toString()))}
+                onClick={() => onVideoChange(path.join(pathName, e.toString()))}
                 key={e.toString()}
             >
                 {e}
@@ -34,7 +36,7 @@ const generateDirectories = (pathName: string, e: string, handleVideoChange: any
     } else return <li key={e.toString()}>{e}</li>;
 };
 
-const Dir = ({ dirPath, handleVideoChange }: DirProps) => {
+const Dir = ({ dirPath, onVideoChange }: DirProps) => {
     const [contents, setContents] = useState(getDirContents(dirPath));
     const [toggled, setToggled] = useState(false);
 
@@ -44,19 +46,19 @@ const Dir = ({ dirPath, handleVideoChange }: DirProps) => {
                 {`${getBasename(dirPath)}/`}
             </span>
             <ul className={'directory-contents'}>
-                {toggled && contents?.map(e => generateDirectories(dirPath, e, handleVideoChange))}
+                {toggled && contents?.map(e => generateDirectories(dirPath, e, onVideoChange))}
             </ul>
         </>
     );
 };
 
-export const Explorer = ({ currentDir, handleVideoChange }: ExplorerProps) => {
+export const Explorer = ({ currentDir, onVideoChange }: ExplorerProps) => {
     return (
         <div className="directory">
             <h6 id="directory-header">EXPLORER</h6>
             <div id="directory-value">{currentDir}</div>
             <ul id="directory-contents">
-                {getDirContents(process.cwd())?.map(e => generateDirectories(process.cwd(), e, handleVideoChange))}
+                {getDirContents(process.cwd())?.map(e => generateDirectories(process.cwd(), e, onVideoChange))}
             </ul>
             <button id="directory-button">Change Directory</button>
         </div>
@@ -81,14 +83,21 @@ const VideoDetails = ({ videos }: VideoDetailsProps) => {
 
 type VideoProps = {
     video: React.MutableRefObject<any>;
+    onLoadMetadata: any;
+    onTimeChange: any;
 };
 
-const Video = ({ video }: VideoProps) => {
+const Video = ({ video, onLoadMetadata, onTimeChange }: VideoProps) => {
     const [paused, setPaused] = useState(true);
 
     return (
         <div className="live-container">
-            <video ref={video} id="live-video"></video>
+            <video
+                ref={video}
+                id="live-video"
+                onLoadedMetadata={() => onLoadMetadata(video.current.duration)}
+                onTimeUpdate={() => onTimeChange(video.current.currentTime)}
+            ></video>
             <div id="live-control" className="live-control">
                 <svg id="skip-back" xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24">
                     <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z" fill="#d6d6d6" />
@@ -130,11 +139,11 @@ const Video = ({ video }: VideoProps) => {
     );
 };
 
-export const Live = ({ video }: LiveProps) => {
+export const Live = ({ video, onLoadMetadata, onTimeChange }: LiveProps) => {
     return (
         <div className="live">
             <VideoDetails />
-            <Video video={video} />
+            <Video video={video} onLoadMetadata={onLoadMetadata} onTimeChange={onTimeChange} />
         </div>
     );
 };
@@ -238,17 +247,15 @@ export const Timeline = ({ ...props }) => {
 };
 
 type FooterProps = {
-    video: React.MutableRefObject<any>;
+    duration: number;
+    currentTime: number;
 };
 
-export const Footer = ({ video }: FooterProps) => {
-    const currentTime: string = '00:00:00';
-    const duration: string = '00:00:00';
-
+export const Footer = ({ duration, currentTime }: FooterProps) => {
     return (
         <div className="footer">
             <span id="pwd"></span>
-            <div id="video-length">{`${currentTime} / ${duration}`}</div>
+            <div id="video-length">{`${sec2hms(currentTime)} / ${sec2hms(duration)}`}</div>
         </div>
     );
 };

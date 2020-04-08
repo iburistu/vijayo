@@ -3,8 +3,8 @@ import { Explorer, Live, Timeline, Footer } from './components';
 
 export function App() {
     const [videos, setVideos] = useState([]);
-    const [duration, setDuration] = useState('00:00:00');
-    const [currentTime, setCurrentTime] = useState('00:00:00');
+    const [duration, setDuration] = useState(0);
+    const [currentTime, setCurrentTime] = useState(0);
 
     const video = useRef(null);
 
@@ -15,12 +15,21 @@ export function App() {
         }
     };
 
+    const handleLoadMetadata = (seconds: number) => {
+        console.log(seconds);
+        setDuration(seconds);
+    };
+
+    const handleTimeChange = (time: number) => {
+        setCurrentTime(time);
+    };
+
     return (
         <>
-            <Explorer currentDir={'vijayo'} handleVideoChange={handleVideoChange} />
-            <Live video={video} />
+            <Explorer currentDir={'vijayo'} onVideoChange={handleVideoChange} />
+            <Live video={video} onLoadMetadata={handleLoadMetadata} onTimeChange={handleTimeChange} />
             <Timeline />
-            <Footer video={video} />
+            <Footer duration={duration} currentTime={currentTime} />
         </>
     );
 }
