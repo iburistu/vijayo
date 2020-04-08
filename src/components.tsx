@@ -1,112 +1,140 @@
-import React from 'react';
-import { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import * as path from 'path';
 
-import { isDir, getDirContents } from './utils';
+import { isDir, getDirContents, getBasename, sec2hms } from './utils';
 
 type DirProps = {
-    dir: string;
+    dirPath: string;
+    handleVideoChange: any;
 };
 
-type DirectoryProps = {
+type ExplorerProps = {
     currentDir?: string;
-    directoryContents?: Array<string>;
+    handleVideoChange: any;
 };
 
-const Dir = ({ dir }: DirProps) => {
-    const [contents, setContents] = useState([]);
+type LiveProps = {
+    video: React.MutableRefObject<any>;
+};
+
+const generateDirectories = (pathName: string, e: string, handleVideoChange: any): JSX.Element => {
+    if (isDir(path.join(pathName, e.toString()))) {
+        return <Dir dirPath={path.join(pathName, e.toString())} handleVideoChange={handleVideoChange} />;
+    }
+    if (path.extname(e) === '.mp4') {
+        return (
+            <li
+                className={'movie-file'}
+                onClick={() => handleVideoChange(path.join(pathName, e.toString()))}
+                key={e.toString()}
+            >
+                {e}
+            </li>
+        );
+    } else return <li key={e.toString()}>{e}</li>;
+};
+
+const Dir = ({ dirPath, handleVideoChange }: DirProps) => {
+    const [contents, setContents] = useState(getDirContents(dirPath));
     const [toggled, setToggled] = useState(false);
 
     return (
         <>
-            <span
-                onClick={() => {
-                    if (toggled) {
-                        setContents([]);
-                        setToggled(!toggled);
-                    } else {
-                        setContents(getDirContents(dir));
-                        setToggled(!toggled);
-                    }
-                }}
-            >
-                {dir}
+            <span className={'directory-text directory-dir'} onClick={() => setToggled(!toggled)}>
+                {`${getBasename(dirPath)}/`}
             </span>
-            <ul>
-                {contents?.map(e => {
-                    if (isDir(e.toString())) {
-                        return <Dir dir={path.join(process.cwd(), e.toString())} />;
-                    } else return <li>{e}</li>;
-                })}
+            <ul className={'directory-contents'}>
+                {toggled && contents?.map(e => generateDirectories(dirPath, e, handleVideoChange))}
             </ul>
         </>
     );
 };
 
-export const Directory = ({ currentDir, directoryContents }: DirectoryProps) => {
+export const Explorer = ({ currentDir, handleVideoChange }: ExplorerProps) => {
     return (
         <div className="directory">
             <h6 id="directory-header">EXPLORER</h6>
             <div id="directory-value">{currentDir}</div>
             <ul id="directory-contents">
-                {directoryContents?.map(e => {
-                    if (isDir(e.toString())) {
-                        return <Dir dir={e.toString()} />;
-                    } else return <li>{e}</li>;
-                })}
+                {getDirContents(process.cwd())?.map(e => generateDirectories(process.cwd(), e, handleVideoChange))}
             </ul>
             <button id="directory-button">Change Directory</button>
         </div>
     );
 };
 
-export const Live = ({ ...props }) => {
+type VideoDetailsProps = {
+    videos?: Array<string>;
+};
+
+const VideoDetails = ({ videos }: VideoDetailsProps) => {
+    return (
+        <div className="video-details">
+            <div className="video-details-tabs">
+                {videos?.map(e => (
+                    <div>{getBasename(e)}</div>
+                ))}
+            </div>
+        </div>
+    );
+};
+
+type VideoProps = {
+    video: React.MutableRefObject<any>;
+};
+
+const Video = ({ video }: VideoProps) => {
+    const [paused, setPaused] = useState(true);
+
+    return (
+        <div className="live-container">
+            <video ref={video} id="live-video"></video>
+            <div id="live-control" className="live-control">
+                <svg id="skip-back" xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24">
+                    <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z" fill="#d6d6d6" />
+                    <path d="M0 0h24v24H0z" fill="none" />
+                </svg>
+                <svg id="rewind" xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24">
+                    <path d="M11 18V6l-8.5 6 8.5 6zm.5-6l8.5 6V6l-8.5 6z" fill="#d6d6d6" />
+                    <path d="M0 0h24v24H0z" fill="none" />
+                </svg>
+                <svg
+                    onClick={() => {
+                        if (paused) {
+                            video.current.play();
+                            setPaused(false);
+                        } else {
+                            video.current.pause();
+                            setPaused(true);
+                        }
+                    }}
+                    id="play-pause"
+                    xmlns="http://www.w3.org/2000/svg"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    width="24"
+                >
+                    <path d={paused ? 'M8 5v14l11-7z' : 'M6 19h4V5H6v14zm8-14v14h4V5h-4z'} fill="#d6d6d6" />
+                    <path d="M0 0h24v24H0z" fill="none" />
+                </svg>
+                <svg id="fast-forward" xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24">
+                    <path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z" fill="#d6d6d6" />
+                    <path d="M0 0h24v24H0z" fill="none" />
+                </svg>
+                <svg id="skip-forward" xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24">
+                    <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z" fill="#d6d6d6" />
+                    <path d="M0 0h24v24H0z" fill="none" />
+                </svg>
+            </div>
+        </div>
+    );
+};
+
+export const Live = ({ video }: LiveProps) => {
     return (
         <div className="live">
-            <div className="video-details">
-                <div className="video-details-tabs">
-                    <div>big_buck_bunny_720p.mp4</div>
-                    <div>big_buck_bunny_720p.mp4</div>
-                    <div>big_buck_bunny_720p.mp4</div>
-                </div>
-            </div>
-            <div className="live-container">
-                <video id="live-video"></video>
-                <div id="live-control" className="live-control">
-                    <svg id="skip-back" xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24">
-                        <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z" fill="#d6d6d6" />
-                        <path d="M0 0h24v24H0z" fill="none" />
-                    </svg>
-                    <svg id="rewind" xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24">
-                        <path d="M11 18V6l-8.5 6 8.5 6zm.5-6l8.5 6V6l-8.5 6z" fill="#d6d6d6" />
-                        <path d="M0 0h24v24H0z" fill="none" />
-                    </svg>
-                    <svg id="play-pause" xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24">
-                        <path d="M8 5v14l11-7z" fill="#d6d6d6" />
-                        <path d="M0 0h24v24H0z" fill="none" />
-                    </svg>
-                    <svg
-                        id="fast-forward"
-                        xmlns="http://www.w3.org/2000/svg"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        width="24"
-                    >
-                        <path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z" fill="#d6d6d6" />
-                        <path d="M0 0h24v24H0z" fill="none" />
-                    </svg>
-                    <svg
-                        id="skip-forward"
-                        xmlns="http://www.w3.org/2000/svg"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        width="24"
-                    >
-                        <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z" fill="#d6d6d6" />
-                        <path d="M0 0h24v24H0z" fill="none" />
-                    </svg>
-                </div>
-            </div>
+            <VideoDetails />
+            <Video video={video} />
         </div>
     );
 };
@@ -209,11 +237,18 @@ export const Timeline = ({ ...props }) => {
     );
 };
 
-export const Footer = ({ ...props }) => {
+type FooterProps = {
+    video: React.MutableRefObject<any>;
+};
+
+export const Footer = ({ video }: FooterProps) => {
+    const currentTime: string = '00:00:00';
+    const duration: string = '00:00:00';
+
     return (
         <div className="footer">
             <span id="pwd"></span>
-            <div id="video-length">00:00:00 / 00:00:00</div>
+            <div id="video-length">{`${currentTime} / ${duration}`}</div>
         </div>
     );
 };
