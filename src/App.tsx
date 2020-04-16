@@ -1,10 +1,12 @@
 import React, { useState, useRef } from 'react';
 import { Explorer, Live, Timeline, Footer } from './components';
+import { ipcRenderer, remote } from 'electron';
 
 export function App() {
     const [videos, setVideos] = useState([]);
     const [duration, setDuration] = useState(0);
     const [currentTime, setCurrentTime] = useState(0);
+    const [currentDir, setCurrentDir] = useState(remote.app.getPath('videos'));
 
     const video = useRef(null);
 
@@ -16,7 +18,6 @@ export function App() {
     };
 
     const handleLoadMetadata = (seconds: number) => {
-        console.log(seconds);
         setDuration(seconds);
     };
 
@@ -24,12 +25,16 @@ export function App() {
         setCurrentTime(time);
     };
 
+    ipcRenderer.on('chdir', (event, arg) => {
+        setCurrentDir(arg);
+    });
+
     return (
         <>
-            <Explorer currentDir={'vijayo'} onVideoChange={handleVideoChange} />
+            <Explorer currentDir={currentDir} onVideoChange={handleVideoChange} />
             <Live video={video} onLoadMetadata={handleLoadMetadata} onTimeChange={handleTimeChange} />
-            <Timeline />
-            <Footer duration={duration} currentTime={currentTime} />
+            <Timeline duration={duration} currentTime={currentTime} />
+            <Footer duration={duration} currentTime={currentTime} currentDir={currentDir} />
         </>
     );
 }

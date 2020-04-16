@@ -50,10 +50,9 @@ h6 {
     grid-template-areas:
         'heading'
         'current_dir'
-        'files'
-        'footer';
+        'files';
     grid-template-columns: 1fr;
-    grid-template-rows: 40px 30px 1fr 40px;
+    grid-template-rows: 40px 30px 1fr;
 
     overflow: hidden;
     resize: horizontal;

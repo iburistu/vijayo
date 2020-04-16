@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import * as path from 'path';
 
 import { isDir, getDirContents, getBasename, sec2hms } from './utils';
@@ -17,6 +17,27 @@ type LiveProps = {
     video: React.MutableRefObject<any>;
     onLoadMetadata: any;
     onTimeChange: any;
+};
+
+type VideoProps = {
+    video: React.MutableRefObject<any>;
+    onLoadMetadata: any;
+    onTimeChange: any;
+};
+
+type VideoDetailsProps = {
+    videos?: Array<string>;
+};
+
+type TimelineProps = {
+    duration: number;
+    currentTime: number;
+};
+
+type FooterProps = {
+    duration: number;
+    currentTime: number;
+    currentDir: string;
 };
 
 const generateDirectories = (pathName: string, e: string, onVideoChange: any): JSX.Element => {
@@ -56,17 +77,12 @@ export const Explorer = ({ currentDir, onVideoChange }: ExplorerProps) => {
     return (
         <div className="directory">
             <h6 id="directory-header">EXPLORER</h6>
-            <div id="directory-value">{currentDir}</div>
+            <div id="directory-value">{path.basename(currentDir)}</div>
             <ul id="directory-contents">
-                {getDirContents(process.cwd())?.map(e => generateDirectories(process.cwd(), e, onVideoChange))}
+                {getDirContents(currentDir)?.map(e => generateDirectories(currentDir, e, onVideoChange))}
             </ul>
-            <button id="directory-button">Change Directory</button>
         </div>
     );
-};
-
-type VideoDetailsProps = {
-    videos?: Array<string>;
 };
 
 const VideoDetails = ({ videos }: VideoDetailsProps) => {
@@ -81,12 +97,6 @@ const VideoDetails = ({ videos }: VideoDetailsProps) => {
     );
 };
 
-type VideoProps = {
-    video: React.MutableRefObject<any>;
-    onLoadMetadata: any;
-    onTimeChange: any;
-};
-
 const Video = ({ video, onLoadMetadata, onTimeChange }: VideoProps) => {
     const [paused, setPaused] = useState(true);
 
@@ -99,7 +109,16 @@ const Video = ({ video, onLoadMetadata, onTimeChange }: VideoProps) => {
                 onTimeUpdate={() => onTimeChange(video.current.currentTime)}
             ></video>
             <div id="live-control" className="live-control">
-                <svg id="skip-back" xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24">
+                <svg
+                    onClick={() => {
+                        video.current.currentTime = 0;
+                    }}
+                    id="skip-back"
+                    xmlns="http://www.w3.org/2000/svg"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    width="24"
+                >
                     <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z" fill="#d6d6d6" />
                     <path d="M0 0h24v24H0z" fill="none" />
                 </svg>
@@ -148,12 +167,42 @@ export const Live = ({ video, onLoadMetadata, onTimeChange }: LiveProps) => {
     );
 };
 
-export const Timeline = ({ ...props }) => {
+export const Timeline = ({ duration, currentTime }: TimelineProps) => {
+    const generateTimeline = (duration: number) => {
+        let timelineElements: Array<React.ReactElement> = [];
+        let overflow: number = duration % 60;
+        let rows: number = ~~(duration / 60);
+        for (let i: number = 0; i < rows; i++) {
+            timelineElements.push(
+                <div key={i} className="timeline-element-wrapper">
+                    <div className="timeline-video-element"></div>
+                </div>
+            );
+        }
+
+        if (overflow) {
+            timelineElements.push(
+                <div key={overflow} className="timeline-element-wrapper">
+                    <div className="timeline-video-element" style={{ width: `${~~((overflow / 60) * 100)}%` }}></div>
+                </div>
+            );
+        }
+
+        return timelineElements;
+    };
+
     return (
         <div className="timeline">
             <div id="timeline-content" className="timeline-content">
                 <div className="vertical-line-container">
-                    <div id="vertical-line" className="vertical-line "></div>
+                    <div
+                        id="vertical-line"
+                        className="vertical-line"
+                        style={{
+                            left: `min(${(currentTime % 60) * 1.6666666}%, 100%)`,
+                            top: `${~~(currentTime / 60) * 80 + 20}px`,
+                        }}
+                    ></div>
                 </div>
                 <div className="timeline-header">
                     <span className="tick-container">
@@ -241,20 +290,16 @@ export const Timeline = ({ ...props }) => {
                         <span>.</span>
                     </span>
                 </div>
+                {generateTimeline(duration)}
             </div>
         </div>
     );
 };
 
-type FooterProps = {
-    duration: number;
-    currentTime: number;
-};
-
-export const Footer = ({ duration, currentTime }: FooterProps) => {
+export const Footer = ({ duration, currentTime, currentDir }: FooterProps) => {
     return (
         <div className="footer">
-            <span id="pwd"></span>
+            <span id="pwd">{currentDir}</span>
             <div id="video-length">{`${sec2hms(currentTime)} / ${sec2hms(duration)}`}</div>
         </div>
     );

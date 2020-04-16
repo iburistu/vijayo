@@ -1,5 +1,7 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, dialog, Menu } from 'electron';
 declare const MAIN_WINDOW_WEBPACK_ENTRY: any;
+
+let mainWindow: any;
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
@@ -7,9 +9,22 @@ if (require('electron-squirrel-startup')) {
     app.quit();
 }
 
+const open_directory_dialog = () => {
+    let options: object = {
+        title: 'Open directory...',
+        properties: ['openDirectory'],
+    };
+
+    dialog.showOpenDialog(mainWindow, options).then((dir: any) => {
+        if (dir.filePaths && dir.filePaths.length) {
+            mainWindow.webContents.send('chdir', dir.filePaths[0]);
+        }
+    });
+};
+
 const createWindow = () => {
     // Create the browser window.
-    const mainWindow = new BrowserWindow({
+    mainWindow = new BrowserWindow({
         width: 1200,
         height: 900,
         backgroundColor: '#1e1f26',
@@ -26,6 +41,32 @@ const createWindow = () => {
 
     // Open the DevTools in development
     if (process.env.NODE_ENV === 'development') mainWindow.webContents.openDevTools();
+
+    let menu = Menu.buildFromTemplate([
+        {
+            label: 'File',
+            submenu: [
+                {
+                    label: 'Open directory...',
+                    click() {
+                        open_directory_dialog();
+                    },
+                    accelerator: 'CmdOrCtrl+O',
+                },
+                {
+                    type: 'separator',
+                },
+                {
+                    label: 'Exit',
+                    click() {
+                        app.quit();
+                    },
+                },
+            ],
+        },
+    ]);
+
+    Menu.setApplicationMenu(menu);
 };
 
 // This method will be called when Electron has finished
