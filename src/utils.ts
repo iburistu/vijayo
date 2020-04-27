@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import React, { useState, useEffect, useRef } from 'react';
 
 export const isDir = (path: string): Boolean => {
     try {
@@ -33,8 +34,31 @@ export const sec2hms = (duration: number): string => {
     let hours = ~~(duration / 3600);
     let minutes = ~~(duration / 60) - 60 * hours;
     let seconds = ~~(duration % 60);
+    let ms = ~~(((duration % 100) - seconds) * 1000);
 
     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds
         .toString()
-        .padStart(2, '0')}`;
+        .padStart(2, '0')}.${ms.toString().padStart(3, '0')}`;
 };
+
+export const movieFiles: Array<string> = ['.mp4', '.webm'];
+
+export function useInterval(callback: any, delay: number) {
+    const savedCallback: React.MutableRefObject<any> = useRef(null);
+
+    // Remember the latest callback.
+    useEffect(() => {
+        savedCallback.current = callback;
+    }, [callback]);
+
+    // Set up the interval.
+    useEffect(() => {
+        function tick() {
+            savedCallback.current();
+        }
+        if (delay !== null) {
+            let id = setInterval(tick, delay);
+            return () => clearInterval(id);
+        }
+    }, [delay]);
+}

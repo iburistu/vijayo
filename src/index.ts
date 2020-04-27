@@ -1,6 +1,7 @@
-import { app, BrowserWindow, dialog, Menu } from 'electron';
+import { app, BrowserWindow, dialog, ipcMain, Menu } from 'electron';
+import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer';
 declare const MAIN_WINDOW_WEBPACK_ENTRY: any;
-
+declare const RENDER_WINDOW_WEBPACK_ENTRY: any;
 let mainWindow: any;
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
@@ -22,6 +23,35 @@ const open_directory_dialog = () => {
     });
 };
 
+const playPause = () => {
+    mainWindow.webContents.send('video', 'playPause');
+};
+
+const restartVideo = () => {
+    mainWindow.webContents.send('video', 'restart');
+};
+
+const forwardFrame = () => {
+    mainWindow.webContents.send('video', 'forwardFrame');
+};
+
+const backwardFrame = () => {
+    mainWindow.webContents.send('video', 'backwardFrame');
+};
+
+const renderVideo = () => {
+    let renderWindow = new BrowserWindow({
+        show: true,
+        title: 'render-process',
+        webPreferences: {
+            nodeIntegration: true,
+            webSecurity: false,
+        },
+    });
+
+    renderWindow.loadURL(RENDER_WINDOW_WEBPACK_ENTRY);
+};
+
 const createWindow = () => {
     // Create the browser window.
     mainWindow = new BrowserWindow({
@@ -40,7 +70,12 @@ const createWindow = () => {
     mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
     // Open the DevTools in development
-    if (process.env.NODE_ENV === 'development') mainWindow.webContents.openDevTools();
+    if (process.env.NODE_ENV === 'development') {
+        mainWindow.webContents.openDevTools();
+        installExtension(REACT_DEVELOPER_TOOLS)
+            .then((name: string) => console.log(`Added Extension: ${name}`))
+            .catch(console.error);
+    }
 
     let menu = Menu.buildFromTemplate([
         {
@@ -61,6 +96,49 @@ const createWindow = () => {
                     click() {
                         app.quit();
                     },
+                },
+            ],
+        },
+        {
+            label: 'Video',
+            submenu: [
+                {
+                    label: 'Play/Pause',
+                    click() {
+                        playPause();
+                    },
+                    accelerator: 'CmdOrCtrl+Space',
+                },
+                {
+                    label: 'Restart',
+                    click() {
+                        restartVideo();
+                    },
+                    accelerator: 'CmdOrCtrl+Shift+Left',
+                },
+                {
+                    label: 'Forward 1 Frame',
+                    click() {
+                        forwardFrame();
+                    },
+                    accelerator: 'CmdOrCtrl+Right',
+                },
+                {
+                    label: 'Backward 1 Frame',
+                    click() {
+                        backwardFrame();
+                    },
+                    accelerator: 'CmdOrCtrl+Left',
+                },
+                {
+                    type: 'separator',
+                },
+                {
+                    label: 'Render to file...',
+                    click() {
+                        renderVideo();
+                    },
+                    accelerator: 'CmdOrCtrl+Shift+R',
                 },
             ],
         },

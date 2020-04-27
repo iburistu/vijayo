@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import * as path from 'path';
 
-import { isDir, getDirContents, getBasename, sec2hms } from './utils';
+import { isDir, getDirContents, getBasename, sec2hms, movieFiles } from './utils';
 
 type DirProps = {
     dirPath: string;
@@ -15,23 +15,40 @@ type ExplorerProps = {
 
 type LiveProps = {
     video: React.MutableRefObject<any>;
+    paused: boolean;
     onLoadMetadata: any;
     onTimeChange: any;
+    onPlayPause: any;
+    videos: Array<string>;
+    onVideoRemoval: any;
 };
 
 type VideoProps = {
     video: React.MutableRefObject<any>;
+    paused: boolean;
     onLoadMetadata: any;
     onTimeChange: any;
+    onPlayPause: any;
 };
 
 type VideoDetailsProps = {
     videos?: Array<string>;
+    videoRef?: React.MutableRefObject<any>;
+    onVideoRemoval: any;
+};
+
+type TabProps = {
+    label: string;
+    activeTab: string;
+    onClickTab: any;
+    onVideoRemoval: any;
 };
 
 type TimelineProps = {
     duration: number;
     currentTime: number;
+    videos: Array<string>;
+    timelineScale: number;
 };
 
 type FooterProps = {
@@ -42,9 +59,9 @@ type FooterProps = {
 
 const generateDirectories = (pathName: string, e: string, onVideoChange: any): JSX.Element => {
     if (isDir(path.join(pathName, e.toString()))) {
-        return <Dir dirPath={path.join(pathName, e.toString())} onVideoChange={onVideoChange} />;
+        return <Dir key={e.toString()} dirPath={path.join(pathName, e.toString())} onVideoChange={onVideoChange} />;
     }
-    if (path.extname(e) === '.mp4') {
+    if (movieFiles.includes(path.extname(e))) {
         return (
             <li
                 className={'movie-file'}
@@ -85,21 +102,73 @@ export const Explorer = ({ currentDir, onVideoChange }: ExplorerProps) => {
     );
 };
 
-const VideoDetails = ({ videos }: VideoDetailsProps) => {
+const Tab = ({ label, activeTab, onClickTab, onVideoRemoval }: TabProps) => {
+    return (
+        <li
+            onClick={() => onClickTab(label)}
+            style={{
+                borderBottom: label === activeTab ? '3px solid rebeccapurple' : 'none',
+                color: label === activeTab ? 'white' : 'inherit',
+            }}
+        >
+            <span>{getBasename(label)}</span>
+            {label === activeTab && (
+                <button onClick={() => onVideoRemoval(label)} className="video-details-button">
+                    X
+                </button>
+            )}
+        </li>
+    );
+};
+
+const VideoDetails = ({ videos, videoRef, onVideoRemoval }: VideoDetailsProps) => {
+    const [activeTab, setActiveTab] = useState('');
+
+    useEffect(() => {
+        setActiveTab(videos[videos.length - 1]);
+    }, [videos]);
+
+    const onClickTab = (tab: string) => {
+        setActiveTab(tab);
+    };
+
     return (
         <div className="video-details">
-            <div className="video-details-tabs">
-                {videos?.map(e => (
-                    <div>{getBasename(e)}</div>
+            <ol className="video-details-tabs">
+                {videos.map(e => (
+                    <Tab
+                        label={e}
+                        activeTab={activeTab}
+                        key={e}
+                        onClickTab={onClickTab}
+                        onVideoRemoval={onVideoRemoval}
+                    />
                 ))}
+            </ol>
+
+            <div className="video-details-content">
+                {videos.map(video => {
+                    if (video !== activeTab) return undefined;
+                    return (
+                        <React.Fragment key={video}>
+                            <div className="video-details-text" key={video}>
+                                <p>File name: {getBasename(video).split('.')[0]}</p>
+                                <p>File location: {path.dirname(video)}</p>
+                                <p>File type: {path.extname(video)}</p>
+                                <p></p>
+                            </div>
+                            <button className="video-details-button" onClick={() => (videoRef.current.src = video)}>
+                                Add to timeline
+                            </button>
+                        </React.Fragment>
+                    );
+                })}
             </div>
         </div>
     );
 };
 
-const Video = ({ video, onLoadMetadata, onTimeChange }: VideoProps) => {
-    const [paused, setPaused] = useState(true);
-
+const Video = ({ video, paused, onLoadMetadata, onTimeChange, onPlayPause }: VideoProps) => {
     return (
         <div className="live-container">
             <video
@@ -127,15 +196,7 @@ const Video = ({ video, onLoadMetadata, onTimeChange }: VideoProps) => {
                     <path d="M0 0h24v24H0z" fill="none" />
                 </svg>
                 <svg
-                    onClick={() => {
-                        if (paused) {
-                            video.current.play();
-                            setPaused(false);
-                        } else {
-                            video.current.pause();
-                            setPaused(true);
-                        }
-                    }}
+                    onClick={() => onPlayPause()}
                     id="play-pause"
                     xmlns="http://www.w3.org/2000/svg"
                     height="24"
@@ -158,16 +219,30 @@ const Video = ({ video, onLoadMetadata, onTimeChange }: VideoProps) => {
     );
 };
 
-export const Live = ({ video, onLoadMetadata, onTimeChange }: LiveProps) => {
+export const Live = ({
+    video,
+    paused,
+    onLoadMetadata,
+    onTimeChange,
+    onPlayPause,
+    videos,
+    onVideoRemoval,
+}: LiveProps) => {
     return (
         <div className="live">
-            <VideoDetails />
-            <Video video={video} onLoadMetadata={onLoadMetadata} onTimeChange={onTimeChange} />
+            <VideoDetails videos={videos} videoRef={video} onVideoRemoval={onVideoRemoval} />
+            <Video
+                video={video}
+                paused={paused}
+                onLoadMetadata={onLoadMetadata}
+                onTimeChange={onTimeChange}
+                onPlayPause={onPlayPause}
+            />
         </div>
     );
 };
 
-export const Timeline = ({ duration, currentTime }: TimelineProps) => {
+export const Timeline = ({ duration, currentTime, videos, timelineScale }: TimelineProps) => {
     const generateTimeline = (duration: number) => {
         let timelineElements: Array<React.ReactElement> = [];
         let overflow: number = duration % 60;
@@ -183,12 +258,34 @@ export const Timeline = ({ duration, currentTime }: TimelineProps) => {
         if (overflow) {
             timelineElements.push(
                 <div key={overflow} className="timeline-element-wrapper">
-                    <div className="timeline-video-element" style={{ width: `${~~((overflow / 60) * 100)}%` }}></div>
+                    <div className="timeline-video-element" style={{ width: `${(overflow / 60) * 100}%` }}></div>
                 </div>
             );
         }
 
         return timelineElements;
+    };
+
+    const generateGuidelines = (scale: number, separator: string = '.') => {
+        const divisions = ~~(60 / scale);
+        let guidelines: Array<React.ReactElement> = [];
+
+        for (let i: number = 0; i < divisions; i++) {
+            guidelines.push(
+                <span key={i} className="tick-container">
+                    <span>{i * scale}</span>
+                    <span>{separator}</span>
+                    <span>{separator}</span>
+                    <span>{separator}</span>
+                    <span>{separator}</span>
+                </span>
+            );
+        }
+        return (
+            <div className="timeline-header" style={{ gridTemplateColumns: `repeat(${divisions}, 1fr)` }}>
+                {guidelines}
+            </div>
+        );
     };
 
     return (
@@ -204,92 +301,7 @@ export const Timeline = ({ duration, currentTime }: TimelineProps) => {
                         }}
                     ></div>
                 </div>
-                <div className="timeline-header">
-                    <span className="tick-container">
-                        <span>0</span>
-                        <span>.</span>
-                        <span>.</span>
-                        <span>.</span>
-                        <span>.</span>
-                    </span>
-                    <span className="tick-container">
-                        <span>5</span>
-                        <span>.</span>
-                        <span>.</span>
-                        <span>.</span>
-                        <span>.</span>
-                    </span>
-                    <span className="tick-container">
-                        <span>10</span>
-                        <span>.</span>
-                        <span>.</span>
-                        <span>.</span>
-                        <span>.</span>
-                    </span>
-                    <span className="tick-container">
-                        <span>15</span>
-                        <span>.</span>
-                        <span>.</span>
-                        <span>.</span>
-                        <span>.</span>
-                    </span>
-                    <span className="tick-container">
-                        <span>20</span>
-                        <span>.</span>
-                        <span>.</span>
-                        <span>.</span>
-                        <span>.</span>
-                    </span>
-                    <span className="tick-container">
-                        <span>25</span>
-                        <span>.</span>
-                        <span>.</span>
-                        <span>.</span>
-                        <span>.</span>
-                    </span>
-                    <span className="tick-container">
-                        <span>30</span>
-                        <span>.</span>
-                        <span>.</span>
-                        <span>.</span>
-                        <span>.</span>
-                    </span>
-                    <span className="tick-container">
-                        <span>35</span>
-                        <span>.</span>
-                        <span>.</span>
-                        <span>.</span>
-                        <span>.</span>
-                    </span>
-                    <span className="tick-container">
-                        <span>40</span>
-                        <span>.</span>
-                        <span>.</span>
-                        <span>.</span>
-                        <span>.</span>
-                    </span>
-                    <span className="tick-container">
-                        <span>45</span>
-                        <span>.</span>
-                        <span>.</span>
-                        <span>.</span>
-                        <span>.</span>
-                    </span>
-                    <span className="tick-container">
-                        <span>50</span>
-                        <span>.</span>
-                        <span>.</span>
-                        <span>.</span>
-                        <span>.</span>
-                    </span>
-                    <span className="tick-container">
-                        <span>55</span>
-                        <span>.</span>
-                        <span>.</span>
-                        <span>.</span>
-                        <span>.</span>
-                    </span>
-                </div>
+                {generateGuidelines(timelineScale, '|')}
                 {generateTimeline(duration)}
             </div>
         </div>
