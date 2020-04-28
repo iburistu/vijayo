@@ -245,6 +245,10 @@ h6 {
     grid-column: 1 / 13;
 }
 
+.timeline-video-element:active {
+    cursor: grabbing;
+}
+
 .timeline-audio-element {
     background-color: #38c955;
     border-radius: 5px;

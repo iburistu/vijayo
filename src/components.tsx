@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import * as path from 'path';
 
 import { isDir, getDirContents, getBasename, sec2hms, movieFiles } from './utils';
@@ -49,6 +49,7 @@ type TimelineProps = {
     currentTime: number;
     videos: Array<string>;
     timelineScale: number;
+    videoRef: React.MutableRefObject<any>;
 };
 
 type FooterProps = {
@@ -242,7 +243,28 @@ export const Live = ({
     );
 };
 
-export const Timeline = ({ duration, currentTime, videos, timelineScale }: TimelineProps) => {
+export const Timeline = ({ duration, currentTime, videos, timelineScale, videoRef }: TimelineProps) => {
+    const verticalLine = useRef(null);
+
+    const mouseHandler = (e: React.MouseEvent<any>, offset: number, videoRef: React.MutableRefObject<any>) => {
+        e.preventDefault();
+
+        // Typescript complains about getBoundingClientRect()...it does exist, in fact!
+        // @ts-ignore
+        let rect = e.target.getBoundingClientRect();
+        let x = e.clientX - rect.left;
+
+        // Set the cursor to the right place
+        verticalLine.current.style.left = `${x}px`;
+        verticalLine.current.style.top = `${offset * 80 + 20}px`;
+
+        // Set the current time to match the new position
+        // Because everything is in percentages, we need to calc the
+        // percentage of a current row
+        let percentRow = x / rect.width;
+        videoRef.current.currentTime = percentRow * 60 + offset * 60;
+    };
+
     const generateTimeline = (duration: number) => {
         let timelineElements: Array<React.ReactElement> = [];
         let overflow: number = duration % 60;
@@ -250,7 +272,7 @@ export const Timeline = ({ duration, currentTime, videos, timelineScale }: Timel
         for (let i: number = 0; i < rows; i++) {
             timelineElements.push(
                 <div key={i} className="timeline-element-wrapper">
-                    <div className="timeline-video-element"></div>
+                    <div onMouseDown={e => mouseHandler(e, i, videoRef)} className="timeline-video-element"></div>
                 </div>
             );
         }
@@ -258,7 +280,11 @@ export const Timeline = ({ duration, currentTime, videos, timelineScale }: Timel
         if (overflow) {
             timelineElements.push(
                 <div key={overflow} className="timeline-element-wrapper">
-                    <div className="timeline-video-element" style={{ width: `${(overflow / 60) * 100}%` }}></div>
+                    <div
+                        onMouseDown={e => mouseHandler(e, rows, videoRef)}
+                        className="timeline-video-element"
+                        style={{ width: `${(overflow / 60) * 100}%` }}
+                    ></div>
                 </div>
             );
         }
@@ -295,8 +321,9 @@ export const Timeline = ({ duration, currentTime, videos, timelineScale }: Timel
                     <div
                         id="vertical-line"
                         className="vertical-line"
+                        ref={verticalLine}
                         style={{
-                            left: `min(${(currentTime % 60) * 1.6666666}%, 100%)`,
+                            left: `${(currentTime % 60) * 1.6666666}%`,
                             top: `${~~(currentTime / 60) * 80 + 20}px`,
                         }}
                     ></div>

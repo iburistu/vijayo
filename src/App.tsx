@@ -37,7 +37,7 @@ export function App() {
             setCurrentTime(video.current.currentTime);
             if (video.current.currentTime === duration) setPaused(true);
         }
-    }, 24);
+    }, 50);
 
     // This handles time changes when paused (user control)
     const handleTimeChange = (time: number) => {
@@ -78,7 +78,13 @@ export function App() {
                 videos={videos}
                 onVideoRemoval={handleVideoRemoval}
             />
-            <Timeline duration={duration} currentTime={currentTime} videos={videos} timelineScale={5} />
+            <Timeline
+                duration={duration}
+                currentTime={currentTime}
+                videos={videos}
+                timelineScale={5}
+                videoRef={video}
+            />
             <Footer duration={duration} currentTime={currentTime} currentDir={currentDir} />
         </>
     );

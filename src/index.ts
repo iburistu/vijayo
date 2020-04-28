@@ -63,6 +63,7 @@ const createWindow = () => {
         webPreferences: {
             nodeIntegration: true,
             webSecurity: process.env.NODE_ENV === 'development' ? false : true,
+            experimentalFeatures: true,
         },
     });
 
