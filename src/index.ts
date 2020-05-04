@@ -1,8 +1,13 @@
 import { app, BrowserWindow, dialog, ipcMain, Menu } from 'electron';
 import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer';
+import { path as ffprobe } from 'ffprobe-static';
+import ffmpeg from 'ffmpeg-static';
+import { exec } from 'child_process';
+import util from 'util';
 declare const MAIN_WINDOW_WEBPACK_ENTRY: any;
 declare const RENDER_WINDOW_WEBPACK_ENTRY: any;
 let mainWindow: any;
+const execute = util.promisify(exec);
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
@@ -51,6 +56,19 @@ const renderVideo = () => {
 
     renderWindow.loadURL(RENDER_WINDOW_WEBPACK_ENTRY);
 };
+
+ipcMain.on('new-video', async (event, args) => {
+    try {
+        const { stdout, stderr } = await execute(
+            `${ffprobe} -v quiet -print_format json -show_format -show_streams "${args}"`
+        );
+        if (stderr) event.reply('video', 'metadata-error');
+        event.reply('video-metadata', stdout);
+    } catch (e) {
+        console.error(e);
+        event.reply('video', 'metadata-error');
+    }
+});
 
 const createWindow = () => {
     // Create the browser window.

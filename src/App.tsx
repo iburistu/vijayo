@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { ipcRenderer, remote } from 'electron';
 import { Explorer, Live, Timeline, Footer } from './components';
 import { useInterval } from './utils';
@@ -15,10 +15,7 @@ export function App() {
 
     // When adding a video to the tab queue, we only want to add new videos
     const handleVideoChange = (vid: string) => {
-        if (!videos.includes(vid)) {
-            setVideos([...videos, vid]);
-            ipcRenderer.send('new-video', vid);
-        }
+        ipcRenderer.send('new-video', vid);
     };
 
     // When the metadata is done loading for a video, we want to grab that duration
@@ -28,7 +25,25 @@ export function App() {
 
     // When a video is removed from the tab list, we want to remove it globally
     const handleVideoRemoval = (video: string) => {
-        setVideos(videos.filter(e => e !== video));
+        setVideos((c) => c.filter((e) => e.format.filename !== video));
+    };
+
+    // This handles time changes when paused (user control)
+    const handleTimeChange = (time: number) => {
+        if (paused) setCurrentTime(time);
+    };
+
+    // This toggles between play and pause
+    const handlePlayPause = () => {
+        setPaused((c) => {
+            if (!c) {
+                video?.current.pause();
+                return true;
+            } else {
+                video?.current.play();
+                return false;
+            }
+        });
     };
 
     // This polls the current time very frequently
@@ -39,32 +54,29 @@ export function App() {
         }
     }, 50);
 
-    // This handles time changes when paused (user control)
-    const handleTimeChange = (time: number) => {
-        if (paused) setCurrentTime(time);
-    };
+    useEffect(() => {
+        ipcRenderer.on('chdir', (event, arg) => {
+            setCurrentDir(arg);
+        });
 
-    // This toggles between play and pause
-    const handlePlayPause = () => {
-        if (paused) {
-            video?.current.play();
-            setPaused(false);
-        } else {
-            video?.current.pause();
-            setPaused(true);
-        }
-    };
+        ipcRenderer.on('video', (event, arg) => {
+            if (arg === 'playPause') handlePlayPause();
+            if (arg === 'restart') video.current.currentTime = 0;
+            if (arg === 'forwardFrame') video.current.currentTime += 1 / 24;
+            if (arg === 'backwardFrame') video.current.currentTime -= 1 / 24;
+        });
 
-    ipcRenderer.once('chdir', (event, arg) => {
-        setCurrentDir(arg);
-    });
+        ipcRenderer.on('video-metadata', (event, arg) => {
+            let obj = JSON.parse(arg);
+            setVideos((c) => {
+                if (c.filter((e) => e.format.filename === obj.format.filename).length === 0) return [...c, obj];
+                else return c;
+            });
+        });
 
-    ipcRenderer.once('video', (event, arg) => {
-        if (arg === 'playPause') handlePlayPause();
-        if (arg === 'restart') video.current.currentTime = 0;
-        if (arg === 'forwardFrame') video.current.currentTime += 1 / 24;
-        if (arg === 'backwardFrame') video.current.currentTime -= 1 / 24;
-    });
+        // @ts-ignore
+        return () => ipcRenderer.removeAllListeners();
+    }, [handlePlayPause, video]);
 
     return (
         <>

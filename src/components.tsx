@@ -19,7 +19,7 @@ type LiveProps = {
     onLoadMetadata: any;
     onTimeChange: any;
     onPlayPause: any;
-    videos: Array<string>;
+    videos: Array<VideoFile>;
     onVideoRemoval: any;
 };
 
@@ -32,7 +32,7 @@ type VideoProps = {
 };
 
 type VideoDetailsProps = {
-    videos?: Array<string>;
+    videos?: Array<VideoFile>;
     videoRef?: React.MutableRefObject<any>;
     onVideoRemoval: any;
 };
@@ -57,6 +57,112 @@ type FooterProps = {
     currentTime: number;
     currentDir: string;
 };
+
+interface Disposition {
+    default: number;
+    dub: number;
+    original: number;
+    comment: number;
+    lyrics: number;
+    karaoke: number;
+    forced: number;
+    hearing_impaired: number;
+    visual_impaired: number;
+    clean_effects: number;
+    attached_pic: number;
+    timed_thumbnails: number;
+}
+
+interface Tags {
+    major_brand: string;
+    minor_version: string;
+    compatible_brands: string;
+    encoder?: string;
+    creation_time?: Date;
+}
+
+interface VideoStream {
+    index: number;
+    codec_name: string;
+    codec_long_name: string;
+    profile: string;
+    codec_type: string;
+    codec_time_base: string;
+    codec_tag_string: string;
+    codec_tag: string;
+    width: number;
+    height: number;
+    coded_width: number;
+    coded_height: number;
+    has_b_frames: number;
+    sample_aspect_ratio: string;
+    display_aspect_ratio: string;
+    pix_fmt: string;
+    level: number;
+    chroma_location: string;
+    refs: number;
+    is_avc: string;
+    nal_length_size: string;
+    r_frame_rate: string;
+    avg_frame_rate: string;
+    time_base: string;
+    start_pts: number;
+    start_time: string;
+    duration_ts: number;
+    duration: string;
+    bit_rate: string;
+    bits_per_raw_sample: string;
+    nb_frames: string;
+    disposition: Disposition;
+    tags: Tags;
+}
+
+interface AudioStream {
+    index: number;
+    codec_name: string;
+    codec_long_name: string;
+    profile: string;
+    codec_type: string;
+    codec_time_base: string;
+    codec_tag_string: string;
+    codec_tag: string;
+    sample_fmt: string;
+    sample_rate: string;
+    channels: number;
+    channel_layout: string;
+    bits_per_sample: number;
+    r_frame_rate: string;
+    avg_frame_rate: string;
+    time_base: string;
+    start_pts: number;
+    start_time: string;
+    duration_ts: number;
+    duration: string;
+    bit_rate: string;
+    max_bit_rate: string;
+    nb_frames: string;
+    disposition: Disposition;
+    tags: Tags;
+}
+
+interface VideoFormat {
+    filename: string;
+    nb_streams: number;
+    nb_programs: number;
+    format_name: string;
+    format_long_name: string;
+    start_time: string;
+    duration: string;
+    size: string;
+    bit_rate: string;
+    probe_score: string;
+    tags: Tags;
+}
+
+interface VideoFile {
+    streams: [VideoStream, AudioStream];
+    format: VideoFormat;
+}
 
 const generateDirectories = (pathName: string, e: string, onVideoChange: any): JSX.Element => {
     if (isDir(path.join(pathName, e.toString()))) {
@@ -85,7 +191,7 @@ const Dir = ({ dirPath, onVideoChange }: DirProps) => {
                 {`${getBasename(dirPath)}/`}
             </span>
             <ul className={'directory-contents'}>
-                {toggled && contents?.map(e => generateDirectories(dirPath, e, onVideoChange))}
+                {toggled && contents?.map((e) => generateDirectories(dirPath, e, onVideoChange))}
             </ul>
         </>
     );
@@ -97,7 +203,7 @@ export const Explorer = ({ currentDir, onVideoChange }: ExplorerProps) => {
             <h6 id="directory-header">EXPLORER</h6>
             <div id="directory-value">{path.basename(currentDir)}</div>
             <ul id="directory-contents">
-                {getDirContents(currentDir)?.map(e => generateDirectories(currentDir, e, onVideoChange))}
+                {getDirContents(currentDir)?.map((e) => generateDirectories(currentDir, e, onVideoChange))}
             </ul>
         </div>
     );
@@ -126,7 +232,7 @@ const VideoDetails = ({ videos, videoRef, onVideoRemoval }: VideoDetailsProps) =
     const [activeTab, setActiveTab] = useState('');
 
     useEffect(() => {
-        setActiveTab(videos[videos.length - 1]);
+        setActiveTab(videos[videos.length - 1]?.format.filename);
     }, [videos]);
 
     const onClickTab = (tab: string) => {
@@ -136,11 +242,11 @@ const VideoDetails = ({ videos, videoRef, onVideoRemoval }: VideoDetailsProps) =
     return (
         <div className="video-details">
             <ol className="video-details-tabs">
-                {videos.map(e => (
+                {videos.map((e) => (
                     <Tab
-                        label={e}
+                        label={e.format.filename}
                         activeTab={activeTab}
-                        key={e}
+                        key={e.format.filename}
                         onClickTab={onClickTab}
                         onVideoRemoval={onVideoRemoval}
                     />
@@ -148,17 +254,19 @@ const VideoDetails = ({ videos, videoRef, onVideoRemoval }: VideoDetailsProps) =
             </ol>
 
             <div className="video-details-content">
-                {videos.map(video => {
-                    if (video !== activeTab) return undefined;
+                {videos.map((video) => {
+                    if (video.format.filename !== activeTab) return undefined;
                     return (
-                        <React.Fragment key={video}>
-                            <div className="video-details-text" key={video}>
-                                <p>File name: {getBasename(video).split('.')[0]}</p>
-                                <p>File location: {path.dirname(video)}</p>
-                                <p>File type: {path.extname(video)}</p>
-                                <p></p>
+                        <React.Fragment key={video.format.filename}>
+                            <div className="video-details-text" key={video.format.filename}>
+                                <p>File name: {getBasename(video.format.filename)}</p>
+                                <p>Video type type: {video.format.format_long_name}</p>
+                                <p>Video duration: {sec2hms(parseFloat(video.format.duration))}</p>
                             </div>
-                            <button className="video-details-button" onClick={() => (videoRef.current.src = video)}>
+                            <button
+                                className="video-details-button"
+                                onClick={() => (videoRef.current.src = video.format.filename)}
+                            >
                                 Add to timeline
                             </button>
                         </React.Fragment>
@@ -177,6 +285,7 @@ const Video = ({ video, paused, onLoadMetadata, onTimeChange, onPlayPause }: Vid
                 id="live-video"
                 onLoadedMetadata={() => onLoadMetadata(video.current.duration)}
                 onTimeUpdate={() => onTimeChange(video.current.currentTime)}
+                preload="auto"
             ></video>
             <div id="live-control" className="live-control">
                 <svg
@@ -245,6 +354,7 @@ export const Live = ({
 
 export const Timeline = ({ duration, currentTime, videos, timelineScale, videoRef }: TimelineProps) => {
     const verticalLine = useRef(null);
+    const currentOverflow = useRef(null);
 
     const mouseHandler = (e: React.MouseEvent<any>, offset: number, videoRef: React.MutableRefObject<any>) => {
         e.preventDefault();
@@ -272,7 +382,7 @@ export const Timeline = ({ duration, currentTime, videos, timelineScale, videoRe
         for (let i: number = 0; i < rows; i++) {
             timelineElements.push(
                 <div key={i} className="timeline-element-wrapper">
-                    <div onMouseDown={e => mouseHandler(e, i, videoRef)} className="timeline-video-element"></div>
+                    <div onDoubleClick={(e) => mouseHandler(e, i, videoRef)} className="timeline-video-element"></div>
                 </div>
             );
         }
@@ -281,9 +391,10 @@ export const Timeline = ({ duration, currentTime, videos, timelineScale, videoRe
             timelineElements.push(
                 <div key={overflow} className="timeline-element-wrapper">
                     <div
-                        onMouseDown={e => mouseHandler(e, rows, videoRef)}
+                        onDoubleClick={(e) => mouseHandler(e, rows, videoRef)}
                         className="timeline-video-element"
                         style={{ width: `${(overflow / 60) * 100}%` }}
+                        ref={currentOverflow}
                     ></div>
                 </div>
             );
