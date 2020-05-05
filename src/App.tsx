@@ -52,7 +52,7 @@ export function App() {
             setCurrentTime(video.current.currentTime);
             if (video.current.currentTime === duration) setPaused(true);
         }
-    }, 50);
+    }, 51);
 
     useEffect(() => {
         ipcRenderer.on('chdir', (event, arg) => {

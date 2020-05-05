@@ -356,14 +356,18 @@ export const Timeline = ({ duration, currentTime, videos, timelineScale, videoRe
     const verticalLine = useRef(null);
     const currentOverflow = useRef(null);
 
-    const mouseHandler = (e: React.MouseEvent<any>, offset: number, videoRef: React.MutableRefObject<any>) => {
+    const mouseHandler = (
+        e: React.MouseEvent<any>,
+        offset: number,
+        videoRef: React.MutableRefObject<any>,
+        overflow: boolean = false
+    ) => {
         e.preventDefault();
 
         // Typescript complains about getBoundingClientRect()...it does exist, in fact!
         // @ts-ignore
         let rect = e.target.getBoundingClientRect();
         let x = e.clientX - rect.left;
-
         // Set the cursor to the right place
         verticalLine.current.style.left = `${x}px`;
         verticalLine.current.style.top = `${offset * 80 + 20}px`;
@@ -372,7 +376,17 @@ export const Timeline = ({ duration, currentTime, videos, timelineScale, videoRe
         // Because everything is in percentages, we need to calc the
         // percentage of a current row
         let percentRow = x / rect.width;
-        videoRef.current.currentTime = percentRow * 60 + offset * 60;
+
+        if (overflow) {
+            // Overflow must be handled differently
+            // Because the overflow row is not exactly 60 seconds per row, we need to compensate for that
+            // Grab the current width of the last row and scale 60 seconds by its actual length
+            videoRef.current.currentTime =
+                (percentRow * 60 * parseFloat(currentOverflow.current.style.width.split('%')[0])) / 100 + offset * 60;
+        } else {
+            // If not overflow, we can just multiply by 60
+            videoRef.current.currentTime = percentRow * 60 + offset * 60;
+        }
     };
 
     const generateTimeline = (duration: number) => {
@@ -391,7 +405,7 @@ export const Timeline = ({ duration, currentTime, videos, timelineScale, videoRe
             timelineElements.push(
                 <div key={overflow} className="timeline-element-wrapper">
                     <div
-                        onDoubleClick={(e) => mouseHandler(e, rows, videoRef)}
+                        onDoubleClick={(e) => mouseHandler(e, rows, videoRef, true)}
                         className="timeline-video-element"
                         style={{ width: `${(overflow / 60) * 100}%` }}
                         ref={currentOverflow}
