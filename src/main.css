@@ -240,9 +240,11 @@ h6 {
 .timeline-video-element {
     background-color: #1985a1;
     border-radius: 10px;
-    height: 50px;
+    height: 48px;
     width: 100%;
-    grid-column: 1 / 13;
+    display: grid;
+    grid-template-rows: repeat(12, 1fr);
+    border: 0.5px solid black;
 }
 
 .timeline-video-element:active {
@@ -255,7 +257,6 @@ h6 {
     height: 15px;
 }
 
-.timeline-element-wrapper,
 .timeline-header {
     display: grid;
 }
@@ -269,8 +270,9 @@ h6 {
 }
 
 .timeline-element-wrapper {
-    grid-template-rows: 80px;
-    align-items: center;
+    display: flex;
+    padding: 8px 0;
+    align-content: center;
 }
 
 .vertical-line-container {
@@ -281,7 +283,7 @@ h6 {
     position: absolute;
     width: 1px;
     background-color: #d6d6d6;
-    height: 80px;
+    height: 65px;
     left: 0%;
     top: 20px;
     /* transition: left 60s linear; */

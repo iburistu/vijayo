@@ -5,12 +5,12 @@ import { isDir, getDirContents, getBasename, sec2hms, movieFiles } from './utils
 
 type DirProps = {
     dirPath: string;
-    onVideoChange: any;
+    onVideoStage: any;
 };
 
 type ExplorerProps = {
     currentDir?: string;
-    onVideoChange: any;
+    onVideoStage: any;
 };
 
 type LiveProps = {
@@ -19,8 +19,9 @@ type LiveProps = {
     onLoadMetadata: any;
     onTimeChange: any;
     onPlayPause: any;
-    videos: Array<VideoFile>;
-    onVideoRemoval: any;
+    stagedVideos: Array<VideoFile>;
+    onVideoReset: any;
+    onActiveVideoAddition: any;
 };
 
 type VideoProps = {
@@ -32,22 +33,23 @@ type VideoProps = {
 };
 
 type VideoDetailsProps = {
-    videos?: Array<VideoFile>;
+    stagedVideos?: Array<VideoFile>;
     videoRef?: React.MutableRefObject<any>;
-    onVideoRemoval: any;
+    onVideoReset: any;
+    onActiveVideoAddition: any;
 };
 
 type TabProps = {
     label: string;
     activeTab: string;
     onClickTab: any;
-    onVideoRemoval: any;
+    onVideoReset: any;
 };
 
 type TimelineProps = {
     duration: number;
     currentTime: number;
-    videos: Array<string>;
+    activeVideos: Array<VideoFile>;
     timelineScale: number;
     videoRef: React.MutableRefObject<any>;
 };
@@ -159,20 +161,20 @@ interface VideoFormat {
     tags: Tags;
 }
 
-interface VideoFile {
+export interface VideoFile {
     streams: [VideoStream, AudioStream];
     format: VideoFormat;
 }
 
-const generateDirectories = (pathName: string, e: string, onVideoChange: any): JSX.Element => {
+const generateDirectories = (pathName: string, e: string, onVideoStage: any): JSX.Element => {
     if (isDir(path.join(pathName, e.toString()))) {
-        return <Dir key={e.toString()} dirPath={path.join(pathName, e.toString())} onVideoChange={onVideoChange} />;
+        return <Dir key={e.toString()} dirPath={path.join(pathName, e.toString())} onVideoStage={onVideoStage} />;
     }
     if (movieFiles.includes(path.extname(e))) {
         return (
             <li
                 className={'movie-file'}
-                onClick={() => onVideoChange(path.join(pathName, e.toString()))}
+                onClick={() => onVideoStage(path.join(pathName, e.toString()))}
                 key={e.toString()}
             >
                 {e}
@@ -181,7 +183,7 @@ const generateDirectories = (pathName: string, e: string, onVideoChange: any): J
     } else return <li key={e.toString()}>{e}</li>;
 };
 
-const Dir = ({ dirPath, onVideoChange }: DirProps) => {
+const Dir = ({ dirPath, onVideoStage }: DirProps) => {
     const [contents, setContents] = useState(getDirContents(dirPath));
     const [toggled, setToggled] = useState(false);
 
@@ -191,25 +193,25 @@ const Dir = ({ dirPath, onVideoChange }: DirProps) => {
                 {`${getBasename(dirPath)}/`}
             </span>
             <ul className={'directory-contents'}>
-                {toggled && contents?.map((e) => generateDirectories(dirPath, e, onVideoChange))}
+                {toggled && contents?.map((e) => generateDirectories(dirPath, e, onVideoStage))}
             </ul>
         </>
     );
 };
 
-export const Explorer = ({ currentDir, onVideoChange }: ExplorerProps) => {
+export const Explorer = ({ currentDir, onVideoStage }: ExplorerProps) => {
     return (
         <div className="directory">
             <h6 id="directory-header">EXPLORER</h6>
             <div id="directory-value">{path.basename(currentDir)}</div>
             <ul id="directory-contents">
-                {getDirContents(currentDir)?.map((e) => generateDirectories(currentDir, e, onVideoChange))}
+                {getDirContents(currentDir)?.map((e) => generateDirectories(currentDir, e, onVideoStage))}
             </ul>
         </div>
     );
 };
 
-const Tab = ({ label, activeTab, onClickTab, onVideoRemoval }: TabProps) => {
+const Tab = ({ label, activeTab, onClickTab, onVideoReset }: TabProps) => {
     return (
         <li
             onClick={() => onClickTab(label)}
@@ -220,7 +222,7 @@ const Tab = ({ label, activeTab, onClickTab, onVideoRemoval }: TabProps) => {
         >
             <span>{getBasename(label)}</span>
             {label === activeTab && (
-                <button onClick={() => onVideoRemoval(label)} className="video-details-button">
+                <button onClick={() => onVideoReset(label)} className="video-details-button">
                     X
                 </button>
             )}
@@ -228,12 +230,12 @@ const Tab = ({ label, activeTab, onClickTab, onVideoRemoval }: TabProps) => {
     );
 };
 
-const VideoDetails = ({ videos, videoRef, onVideoRemoval }: VideoDetailsProps) => {
+const VideoDetails = ({ stagedVideos, videoRef, onVideoReset, onActiveVideoAddition }: VideoDetailsProps) => {
     const [activeTab, setActiveTab] = useState('');
 
     useEffect(() => {
-        setActiveTab(videos[videos.length - 1]?.format.filename);
-    }, [videos]);
+        setActiveTab(stagedVideos[stagedVideos.length - 1]?.format.filename);
+    }, [stagedVideos]);
 
     const onClickTab = (tab: string) => {
         setActiveTab(tab);
@@ -242,19 +244,19 @@ const VideoDetails = ({ videos, videoRef, onVideoRemoval }: VideoDetailsProps) =
     return (
         <div className="video-details">
             <ol className="video-details-tabs">
-                {videos.map((e) => (
+                {stagedVideos.map((e) => (
                     <Tab
                         label={e.format.filename}
                         activeTab={activeTab}
                         key={e.format.filename}
                         onClickTab={onClickTab}
-                        onVideoRemoval={onVideoRemoval}
+                        onVideoReset={onVideoReset}
                     />
                 ))}
             </ol>
 
             <div className="video-details-content">
-                {videos.map((video) => {
+                {stagedVideos.map((video) => {
                     if (video.format.filename !== activeTab) return undefined;
                     return (
                         <React.Fragment key={video.format.filename}>
@@ -263,10 +265,7 @@ const VideoDetails = ({ videos, videoRef, onVideoRemoval }: VideoDetailsProps) =
                                 <p>Video type type: {video.format.format_long_name}</p>
                                 <p>Video duration: {sec2hms(parseFloat(video.format.duration))}</p>
                             </div>
-                            <button
-                                className="video-details-button"
-                                onClick={() => (videoRef.current.src = video.format.filename)}
-                            >
+                            <button className="video-details-button" onClick={() => onActiveVideoAddition(video)}>
                                 Add to timeline
                             </button>
                         </React.Fragment>
@@ -335,12 +334,18 @@ export const Live = ({
     onLoadMetadata,
     onTimeChange,
     onPlayPause,
-    videos,
-    onVideoRemoval,
+    stagedVideos,
+    onVideoReset,
+    onActiveVideoAddition,
 }: LiveProps) => {
     return (
         <div className="live">
-            <VideoDetails videos={videos} videoRef={video} onVideoRemoval={onVideoRemoval} />
+            <VideoDetails
+                stagedVideos={stagedVideos}
+                videoRef={video}
+                onVideoReset={onVideoReset}
+                onActiveVideoAddition={onActiveVideoAddition}
+            />
             <Video
                 video={video}
                 paused={paused}
@@ -352,15 +357,17 @@ export const Live = ({
     );
 };
 
-export const Timeline = ({ duration, currentTime, videos, timelineScale, videoRef }: TimelineProps) => {
+export const Timeline = ({ duration, currentTime, activeVideos, timelineScale, videoRef }: TimelineProps) => {
     const verticalLine = useRef(null);
     const currentOverflow = useRef(null);
+    const newOverflow = useRef(null);
 
     const mouseHandler = (
         e: React.MouseEvent<any>,
         offset: number,
         videoRef: React.MutableRefObject<any>,
-        overflow: boolean = false
+        overflow: boolean = false,
+        overflowOffset: number = 0
     ) => {
         e.preventDefault();
 
@@ -369,8 +376,8 @@ export const Timeline = ({ duration, currentTime, videos, timelineScale, videoRe
         let rect = e.target.getBoundingClientRect();
         let x = e.clientX - rect.left;
         // Set the cursor to the right place
-        verticalLine.current.style.left = `${x}px`;
-        verticalLine.current.style.top = `${offset * 80 + 20}px`;
+        verticalLine.current.style.left = `calc(${x}px + ${overflowOffset}%)`;
+        verticalLine.current.style.top = `${offset * 65 + 20}px`;
 
         // Set the current time to match the new position
         // Because everything is in percentages, we need to calc the
@@ -389,29 +396,68 @@ export const Timeline = ({ duration, currentTime, videos, timelineScale, videoRe
         }
     };
 
-    const generateTimeline = (duration: number) => {
+    const generateTimeline = (activeVideos: Array<VideoFile>) => {
         let timelineElements: Array<React.ReactElement> = [];
-        let overflow: number = duration % 60;
-        let rows: number = ~~(duration / 60);
-        for (let i: number = 0; i < rows; i++) {
-            timelineElements.push(
-                <div key={i} className="timeline-element-wrapper">
-                    <div onDoubleClick={(e) => mouseHandler(e, i, videoRef)} className="timeline-video-element"></div>
-                </div>
-            );
-        }
+        let lastRows: number = 0;
+        let lastOverflow: number = 0;
+        for (let i: number = 0; i < activeVideos.length; i++) {
+            // ...so...I think this has to do with closures...a little bit above my understanding
+            // I need to redefine the variable in the same lexical scope such that the anonymous
+            // function can read the correct value as the offset
+            let closureLastRows: number = lastRows;
 
-        if (overflow) {
-            timelineElements.push(
-                <div key={overflow} className="timeline-element-wrapper">
-                    <div
-                        onDoubleClick={(e) => mouseHandler(e, rows, videoRef, true)}
-                        className="timeline-video-element"
-                        style={{ width: `${(overflow / 60) * 100}%` }}
-                        ref={currentOverflow}
-                    ></div>
-                </div>
-            );
+            let duration = parseInt(activeVideos[i].format.duration);
+            let overflow: number = (duration - lastOverflow) % 60;
+            let rows: number = ~~((duration - lastOverflow) / 60);
+
+            for (let j: number = 0; j < rows; j++) {
+                timelineElements.push(
+                    <div key={closureLastRows + j} className="timeline-element-wrapper">
+                        <div
+                            onDoubleClick={(e) => mouseHandler(e, closureLastRows + j, videoRef)}
+                            className="timeline-video-element"
+                        ></div>
+                    </div>
+                );
+            }
+
+            if (overflow) {
+                // There's still videos that we can process.  We need to append the next
+                // video to this one now.  We can't edit the array afterwords!
+                if (i < activeVideos.length - 1) {
+                    timelineElements.push(
+                        <div className="timeline-element-wrapper">
+                            <div
+                                key={`${closureLastRows + rows}a`}
+                                onDoubleClick={(e) => mouseHandler(e, closureLastRows + rows, videoRef, true)}
+                                className="timeline-video-element"
+                                style={{ width: `calc(${(overflow / 60) * 100}% - 1px)` }}
+                            ></div>
+                            <div
+                                key={`${closureLastRows + rows}b`}
+                                onDoubleClick={(e) =>
+                                    mouseHandler(e, closureLastRows + rows, videoRef, true, (overflow / 60) * 100)
+                                }
+                                className="timeline-video-element"
+                                style={{ width: `calc(${((60 - overflow) / 60) * 100}% - 1px)` }}
+                            ></div>
+                        </div>
+                    );
+                } else
+                    timelineElements.push(
+                        <div className="timeline-element-wrapper" ref={newOverflow}>
+                            <div
+                                onDoubleClick={(e) => mouseHandler(e, closureLastRows + rows, videoRef, true)}
+                                className="timeline-video-element"
+                                style={{ width: `${(overflow / 60) * 100}%` }}
+                                ref={currentOverflow}
+                            ></div>
+                        </div>
+                    );
+            }
+            // Change the outer variables
+            lastRows = overflow ? rows + 1 : rows;
+            lastOverflow = overflow;
         }
 
         return timelineElements;
@@ -454,7 +500,7 @@ export const Timeline = ({ duration, currentTime, videos, timelineScale, videoRe
                     ></div>
                 </div>
                 {generateGuidelines(timelineScale, '|')}
-                {generateTimeline(duration)}
+                {generateTimeline(activeVideos)}
             </div>
         </div>
     );
