@@ -7,3 +7,4 @@ thumbs.db
 *.log
 .webpack/
 *.mp4
+.vscode

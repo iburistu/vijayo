@@ -456,7 +456,7 @@ export const Timeline = ({ duration, currentTime, activeVideos, timelineScale, v
                     );
             }
             // Change the outer variables
-            lastRows = overflow ? rows + 1 : rows;
+            lastRows += overflow ? rows + 1 : rows;
             lastOverflow = overflow;
         }
 
