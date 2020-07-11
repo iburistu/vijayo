@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { ipcRenderer, remote } from 'electron';
-import { Explorer, Live, Timeline, Footer, VideoFile } from './components';
+import { Explorer, Live, Timeline, Footer, VideoFile, VideoManager } from './components';
 import { useInterval } from './utils';
 
 export function App() {
@@ -95,13 +95,7 @@ export function App() {
                 onVideoReset={handleVideoReset}
                 onActiveVideoAddition={handleActiveVideoAddition}
             />
-            <Timeline
-                duration={duration}
-                currentTime={currentTime}
-                activeVideos={activeVideos}
-                timelineScale={5}
-                videoRef={video}
-            />
+            <VideoManager activeVideos={activeVideos} currentTime={currentTime} />
             <Footer duration={duration} currentTime={currentTime} currentDir={currentDir} />
         </>
     );

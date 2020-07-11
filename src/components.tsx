@@ -54,6 +54,11 @@ type TimelineProps = {
     videoRef: React.MutableRefObject<any>;
 };
 
+type VideoManagerProps = {
+    activeVideos: Array<VideoFile>;
+    currentTime: number;
+};
+
 type FooterProps = {
     duration: number;
     currentTime: number;
@@ -357,6 +362,179 @@ export const Live = ({
     );
 };
 
+interface Timeline {
+    start: number;
+    end: number;
+}
+
+interface Video {
+    start: number;
+    end: number;
+    src: string;
+    filename: string;
+}
+
+interface TimelineVideo {
+    timeline: Timeline;
+    video: Video;
+}
+
+// The VideoManager controls the layout of videos on the timeline as well as the video that should be
+// played currently
+export const VideoManager = ({ activeVideos, currentTime }: VideoManagerProps) => {
+    const timelineVideos: Array<TimelineVideo> = activeVideos.map((e, i, arr) => {
+        return {
+            timeline: {
+                start: arr.slice(0, i).reduce((a, b) => a + parseFloat(b.format.duration), 0),
+                end: arr.slice(0, i).reduce((a, b) => a + parseFloat(b.format.duration), parseFloat(e.format.duration)),
+            },
+            video: {
+                start: arr.slice(0, i).reduce((a, b) => a + parseFloat(b.format.duration), 0),
+                end: arr.slice(0, i).reduce((a, b) => a + parseFloat(b.format.duration), parseFloat(e.format.duration)),
+                src: e.format.filename,
+                filename: getBasename(e.format.filename),
+            },
+        };
+    });
+
+    // Find the video to play as well as when to play it
+    if (timelineVideos.length > 0) {
+        const { start, end, src } = timelineVideos.find((e) => {
+            const { start, end } = e.video;
+            return currentTime >= start && currentTime < end;
+        }).video;
+
+        console.log({ start, end, src });
+    }
+
+    return <NewTimeline timelineVideos={timelineVideos} />;
+};
+
+type GuidelineProps = {
+    scale: number;
+    separator: string;
+};
+
+const Guideline = ({ scale, separator }: GuidelineProps) => {
+    const divisions = ~~(60 / scale);
+    let guidelines: Array<React.ReactElement> = [];
+
+    for (let i: number = 0; i < divisions; i++) {
+        guidelines.push(
+            <span key={i} className="tick-container">
+                <span>{i * scale}</span>
+                <span>{separator}</span>
+                <span>{separator}</span>
+                <span>{separator}</span>
+                <span>{separator}</span>
+            </span>
+        );
+    }
+    return guidelines;
+};
+
+type NewTimelineProps = {
+    timelineVideos: Array<TimelineVideo>;
+};
+
+// The timeline should be passed an array of objects that describes how each active video should be laid out
+const NewTimeline = ({ timelineVideos }: NewTimelineProps) => {
+    // Controls the number of grid rows generated
+    if (timelineVideos.length > 0) {
+        let maxEnd = timelineVideos?.reduce((a, b) => (a.timeline.end > b.timeline.end ? a : b))?.timeline?.end ?? 0;
+        if (maxEnd) {
+            // Generate the rows
+            const genRows = timelineVideos.map((e) => {
+                const { start, end } = e.timeline;
+                const { filename } = e.video;
+                // Find the start location (row and column)
+                const rowStart = ~~(start / 60) + 1;
+                const colStart = ~~((start % 60) * 10) + 1;
+                // Raw number of rows needed to represent a video file
+                // Depending on the previous video on the timeline, the number of rows will change
+                const rows = Math.ceil((end + ~~(start % 60) - start) / 60);
+                // Find the stop location for the last row
+                const colEnd = ~~((end % 60) * 10) + 1;
+                let timelineElements: Array<React.ReactElement> = [];
+                // Start
+                timelineElements.push(
+                    <div
+                        className="timeline-video-element-new"
+                        style={{ gridArea: `${rowStart} / ${colStart} / ${rowStart} / 600` }}
+                    >
+                        <h6 className="timeline-video-element-text">{filename}</h6>
+                    </div>
+                );
+                // Middle rows
+                for (let i = 1; i < rows - 1; i++) {
+                    timelineElements.push(
+                        <div
+                            className="timeline-video-element-new"
+                            style={{ gridArea: `${rowStart + i} / 1 / ${rowStart + i} / 600` }}
+                        >
+                            <h6 className="timeline-video-element-text">{filename}</h6>
+                        </div>
+                    );
+                }
+                // End
+                timelineElements.push(
+                    <div
+                        className="timeline-video-element-new"
+                        style={{ gridArea: `${rowStart + rows - 1} / 1 / ${rowStart + rows - 1} / ${colEnd}` }}
+                    >
+                        <h6 className="timeline-video-element-text">{filename}</h6>
+                    </div>
+                );
+
+                return timelineElements;
+            });
+
+            return (
+                <div className="timeline-new">
+                    <div className="timeline-header" style={{ gridTemplateColumns: `repeat(${~~(60 / 5)}, 1fr)` }}>
+                        <Guideline scale={5} separator={'|'} />
+                    </div>
+                    <TimelineRows maxDuration={maxEnd}>{genRows}</TimelineRows>
+                </div>
+            );
+        }
+    } else return <></>;
+};
+
+type TimelineRowsProps = {
+    maxDuration: number;
+    children: any;
+};
+
+const TimelineRows = ({ maxDuration, children }: TimelineRowsProps) => {
+    // Generate the number of rows needed
+    return (
+        <div
+            className="timeline-content-new"
+            style={{ gridTemplateRows: `repeat(${Math.ceil(maxDuration / 60)}, 65px)` }}
+        >
+            <TimeKeeper currentTime={0} />
+            {children}
+        </div>
+    );
+};
+
+type TimeKeeperProps = {
+    currentTime: number;
+};
+
+const TimeKeeper = ({ currentTime }: TimeKeeperProps) => (
+    <div
+        className="vertical-line-container"
+        style={{
+            gridArea: `1 / 1 / 1 / 1`,
+            zIndex: 99,
+        }}
+    >
+        <div id="vertical-line" className="vertical-line"></div>
+    </div>
+);
+
 export const Timeline = ({ duration, currentTime, activeVideos, timelineScale, videoRef }: TimelineProps) => {
     const verticalLine = useRef(null);
     const currentOverflow = useRef(null);
@@ -495,7 +673,7 @@ export const Timeline = ({ duration, currentTime, activeVideos, timelineScale, v
                         ref={verticalLine}
                         style={{
                             left: `${(currentTime % 60) * 1.6666666}%`,
-                            top: `${~~(currentTime / 60) * 80 + 20}px`,
+                            top: `${~~(currentTime / 60) * 65 + 20}px`,
                         }}
                     ></div>
                 </div>

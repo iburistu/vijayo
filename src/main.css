@@ -230,11 +230,33 @@ h6 {
     overflow: auto;
 }
 
+.timeline-new {
+    grid-area: timeline;
+    background-color: #22232a;
+    border-top: 1px solid black;
+    display: grid;
+    grid-template-areas:
+        'guidelines'
+        'content';
+    grid-template-columns: 1fr;
+    grid-template-rows: 20px 1fr;
+    overflow: auto;
+}
+
 .timeline-content {
     grid-area: content;
     padding: 0.5em;
     display: flex;
     flex-direction: column;
+}
+
+.timeline-content-new {
+    grid-area: content;
+    display: grid;
+    grid-template-columns: repeat(600, 1fr);
+    row-gap: 0.5em;
+    align-items: center;
+    padding-left: 0.5em;
 }
 
 .timeline-video-element {
@@ -245,6 +267,23 @@ h6 {
     display: grid;
     grid-template-rows: repeat(12, 1fr);
     border: 0.5px solid black;
+}
+
+.timeline-video-element-new {
+    background-color: #1985a1;
+    border-radius: 10px;
+    height: 48px;
+    border: 0.5px solid black;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.timeline-video-element-text {
+    margin: 0;
+    padding-left: 0.5rem;
+    padding-top: 0.25rem;
+    color: #000;
 }
 
 .timeline-video-element:active {
