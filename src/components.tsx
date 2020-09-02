@@ -410,12 +410,7 @@ export const VideoManager = ({ activeVideos, currentTime }: VideoManagerProps) =
     return <NewTimeline timelineVideos={timelineVideos} />;
 };
 
-type GuidelineProps = {
-    scale: number;
-    separator: string;
-};
-
-const Guideline = ({ scale, separator }: GuidelineProps) => {
+const generateGuidelines = (scale: number, separator: string): Array<React.ReactElement> => {
     const divisions = ~~(60 / scale);
     let guidelines: Array<React.ReactElement> = [];
 
@@ -461,6 +456,7 @@ const NewTimeline = ({ timelineVideos }: NewTimelineProps) => {
                     <div
                         className="timeline-video-element-new"
                         style={{ gridArea: `${rowStart} / ${colStart} / ${rowStart} / 600` }}
+                        key={`${rowStart}-${colStart}`}
                     >
                         <h6 className="timeline-video-element-text">{filename}</h6>
                     </div>
@@ -469,6 +465,7 @@ const NewTimeline = ({ timelineVideos }: NewTimelineProps) => {
                 for (let i = 1; i < rows - 1; i++) {
                     timelineElements.push(
                         <div
+                            key={rowStart + i}
                             className="timeline-video-element-new"
                             style={{ gridArea: `${rowStart + i} / 1 / ${rowStart + i} / 600` }}
                         >
@@ -479,6 +476,7 @@ const NewTimeline = ({ timelineVideos }: NewTimelineProps) => {
                 // End
                 timelineElements.push(
                     <div
+                        key={rowStart + rows - 1}
                         className="timeline-video-element-new"
                         style={{ gridArea: `${rowStart + rows - 1} / 1 / ${rowStart + rows - 1} / ${colEnd}` }}
                     >
@@ -492,7 +490,7 @@ const NewTimeline = ({ timelineVideos }: NewTimelineProps) => {
             return (
                 <div className="timeline-new">
                     <div className="timeline-header" style={{ gridTemplateColumns: `repeat(${~~(60 / 5)}, 1fr)` }}>
-                        <Guideline scale={5} separator={'|'} />
+                        {generateGuidelines(5, '|')}
                     </div>
                     <TimelineRows maxDuration={maxEnd}>{genRows}</TimelineRows>
                 </div>

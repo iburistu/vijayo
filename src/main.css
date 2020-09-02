@@ -319,13 +319,9 @@ h6 {
 }
 
 .vertical-line {
-    position: absolute;
     width: 1px;
     background-color: #d6d6d6;
     height: 65px;
-    left: 0%;
-    top: 20px;
-    /* transition: left 60s linear; */
 }
 
 .footer {

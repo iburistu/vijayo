@@ -61,7 +61,7 @@ const renderVideo = () => {
 ipcMain.on('new-video', async (event, args) => {
     try {
         const { stdout, stderr } = await execute(
-            `${ffprobe} -v quiet -print_format json -show_format -show_streams "${args}"`
+            `"${ffprobe}" -v quiet -print_format json -show_format -show_streams "${args}"`
         );
         if (stderr) event.reply('video', 'metadata-error');
         event.reply('video-metadata', stdout);
